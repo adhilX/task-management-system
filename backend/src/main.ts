@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -10,6 +11,31 @@ async function bootstrap() {
   
   // Set global prefix for API routes
   app.setGlobalPrefix('api');
+
+  // Configure Swagger OpenAPI
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('TaskFlow API')
+    .setDescription('The TaskFlow Agile Task & Project Management System API specification.')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This is the authorization key for @ApiBearerAuth('JWT-auth')
+    )
+    .build();
+  
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, swaggerDocument, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   // Enable validation pipe
   app.useGlobalPipes(
@@ -33,5 +59,7 @@ async function bootstrap() {
 
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}/api`);
+  console.log(`Swagger documentation is running on: http://localhost:${port}/api/docs`);
 }
 bootstrap();
+

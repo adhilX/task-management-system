@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -20,9 +21,11 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async me(@CurrentUser() user: any) {
     return user;
   }
 }
+
