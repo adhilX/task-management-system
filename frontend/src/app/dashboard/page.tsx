@@ -12,8 +12,13 @@ import {
   Calendar,
   ChevronRight,
   TrendingUp,
+  Inbox,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Card, StatsCard } from '@/components/shared/card';
+import Badge from '@/components/shared/badge';
+import EmptyState from '@/components/shared/empty-state';
+import { CardSkeleton } from '@/components/shared/loading-skeleton';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -30,10 +35,19 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-          <p className="text-sm text-slate-400">Fetching workspace metrics...</p>
+      <div className="space-y-8 animate-pulse">
+        <div className="space-y-2">
+          <div className="h-8 w-48 bg-slate-800 rounded-lg"></div>
+          <div className="h-4 w-72 bg-slate-800/60 rounded-lg"></div>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="h-80 bg-slate-900/20 border border-slate-900 rounded-xl"></div>
+          <div className="h-80 bg-slate-900/20 border border-slate-900 rounded-xl"></div>
         </div>
       </div>
     );
@@ -41,11 +55,13 @@ export default function DashboardPage() {
 
   if (error || !stats) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-lg border border-red-900/30 bg-red-950/20 p-6">
-        <div className="flex flex-col items-center space-y-2 text-red-400">
-          <AlertCircle className="h-10 w-10" />
-          <h3 className="text-lg font-bold">Failed to load analytics</h3>
-          <p className="text-sm text-slate-400">Please verify connection or try again later.</p>
+      <div className="flex h-96 items-center justify-center rounded-xl border border-red-950/30 bg-red-950/10 p-8 text-center max-w-xl mx-auto">
+        <div className="flex flex-col items-center space-y-3 text-red-400">
+          <AlertCircle className="h-12 w-12 text-red-500" />
+          <h3 className="text-lg font-bold text-white">Failed to Load Dashboard</h3>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            There was an issue fetching system analytics. Please verify your internet connection or backend services.
+          </p>
         </div>
       </div>
     );
@@ -54,114 +70,85 @@ export default function DashboardPage() {
   const isAdmin = user?.role === 'Admin';
 
   if (isAdmin) {
-    // Admin Dashboard Render
     const { totalEmployees, totalProjects, totalTasks, taskCompletion, projectProgress, recentActivities } = stats;
 
     return (
       <div className="space-y-8">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">System Console</h1>
-          <p className="text-sm text-slate-400">Workspace status, projects aggregate, and operational logs.</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight leading-tight">System Console</h1>
+          <p className="text-sm text-slate-400 mt-1">Workspace status, projects aggregate, and operational logs.</p>
         </div>
 
         {/* 3 Metric Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="relative overflow-hidden rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl transition hover:border-slate-800">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-indigo-500/5 blur-xl"></div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">Employees</p>
-                <h3 className="mt-2 text-3xl font-bold text-white">{totalEmployees}</h3>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <Users className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center space-x-1.5 text-xs text-indigo-400">
-              <TrendingUp className="h-4 w-4" />
-              <span>Workspace accounts active</span>
-            </div>
-          </div>
-
-          <div className="relative overflow-hidden rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl transition hover:border-slate-800">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-violet-500/5 blur-xl"></div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">Projects</p>
-                <h3 className="mt-2 text-3xl font-bold text-white">{totalProjects}</h3>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
-                <FolderGit2 className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center space-x-1.5 text-xs text-violet-400">
-              <TrendingUp className="h-4 w-4" />
-              <span>Active client & internal spaces</span>
-            </div>
-          </div>
-
-          <div className="relative overflow-hidden rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl transition hover:border-slate-800">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-500/5 blur-xl"></div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">Total Tasks</p>
-                <h3 className="mt-2 text-3xl font-bold text-white">{totalTasks}</h3>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <CheckCircle2 className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center space-x-1.5 text-xs text-emerald-400">
-              <span>{taskCompletion.completed} completed task items</span>
-            </div>
-          </div>
+          <StatsCard
+            title="Employees"
+            value={totalEmployees}
+            icon={Users}
+            color="indigo"
+            description="Workspace accounts active"
+          />
+          <StatsCard
+            title="Projects"
+            value={totalProjects}
+            icon={FolderGit2}
+            color="violet"
+            description="Active client & internal spaces"
+          />
+          <StatsCard
+            title="Total Tasks"
+            value={totalTasks}
+            icon={CheckCircle2}
+            color="emerald"
+            description={`${taskCompletion.completed} completed task items`}
+          />
         </div>
 
         {/* Breakdown Columns */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Tasks & Projects Breakdown */}
-          <div className="rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl space-y-6">
-            <h3 className="text-lg font-bold text-white">Status Breakdown</h3>
+          <Card className="space-y-6">
+            <h3 className="text-lg font-bold text-white tracking-tight">Status Breakdown</h3>
             
             {/* Task progress bar */}
             <div className="space-y-2">
-              <div className="flex justify-between text-xs text-slate-400 font-semibold uppercase">
+              <div className="flex justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
                 <span>Task Completion Rate</span>
                 <span className="text-white">
                   {totalTasks > 0 ? Math.round((taskCompletion.completed / totalTasks) * 100) : 0}%
                 </span>
               </div>
-              <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-800/80 overflow-hidden">
                 <div
-                  className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                  className="h-full bg-indigo-500 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                   style={{ width: `${totalTasks > 0 ? (taskCompletion.completed / totalTasks) * 100 : 0}%` }}
                 ></div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-slate-900/40 border border-slate-900 p-3">
+              <div className="rounded-xl bg-slate-900/40 border border-slate-900 p-4">
                 <span className="text-xs text-slate-400 font-medium">To Do</span>
-                <p className="text-xl font-bold text-white mt-1">{taskCompletion.breakdown.todo}</p>
+                <p className="text-2xl font-bold text-white mt-1">{taskCompletion.breakdown.todo}</p>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-slate-900 p-3">
+              <div className="rounded-xl bg-slate-900/40 border border-slate-900 p-4">
                 <span className="text-xs text-slate-400 font-medium">In Progress</span>
-                <p className="text-xl font-bold text-indigo-400 mt-1">{taskCompletion.breakdown.inProgress}</p>
+                <p className="text-2xl font-bold text-indigo-400 mt-1">{taskCompletion.breakdown.inProgress}</p>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-slate-900 p-3">
+              <div className="rounded-xl bg-slate-900/40 border border-slate-900 p-4">
                 <span className="text-xs text-slate-400 font-medium">In Review</span>
-                <p className="text-xl font-bold text-violet-400 mt-1">{taskCompletion.breakdown.review}</p>
+                <p className="text-2xl font-bold text-violet-400 mt-1">{taskCompletion.breakdown.review}</p>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-slate-900 p-3">
+              <div className="rounded-xl bg-slate-900/40 border border-slate-900 p-4">
                 <span className="text-xs text-slate-400 font-medium">Completed</span>
-                <p className="text-xl font-bold text-emerald-400 mt-1">{taskCompletion.breakdown.completed}</p>
+                <p className="text-2xl font-bold text-emerald-400 mt-1">{taskCompletion.breakdown.completed}</p>
               </div>
             </div>
 
             {/* Project status counts */}
-            <div className="pt-4 border-t border-slate-900 space-y-3">
-              <h4 className="text-sm font-bold text-white">Project States</h4>
+            <div className="pt-4 border-t border-slate-900/60 space-y-3">
+              <h4 className="text-sm font-bold text-white tracking-tight">Project States</h4>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-400">Planning</span>
                 <span className="font-bold text-white">{projectProgress.planning}</span>
@@ -179,48 +166,50 @@ export default function DashboardPage() {
                 <span className="font-bold text-amber-400">{projectProgress.onHold}</span>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Activity Feed */}
-          <div className="rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl flex flex-col">
-            <h3 className="text-lg font-bold text-white mb-4">Recent Task activity</h3>
+          <Card className="flex flex-col">
+            <h3 className="text-lg font-bold text-white tracking-tight mb-4">Recent Task Activity</h3>
             <div className="flex-1 space-y-4">
               {recentActivities && recentActivities.length > 0 ? (
                 recentActivities.map((act: any) => (
-                  <div key={act.id} className="flex items-start justify-between rounded-lg bg-slate-900/40 border border-slate-900/60 p-4 hover:border-slate-800 transition">
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-semibold text-white">{act.title}</h4>
+                  <div key={act.id} className="flex items-start justify-between rounded-xl bg-slate-900/40 border border-slate-900/80 p-4 hover:border-slate-800 transition-colors">
+                    <div className="space-y-1.5">
+                      <h4 className="text-sm font-semibold text-white leading-snug">{act.title}</h4>
                       <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-slate-400">
                         <span>Project: <strong className="text-slate-300">{act.projectName}</strong></span>
                         <span>•</span>
                         <span>Assignee: <strong className="text-slate-300">{act.assigneeName}</strong></span>
                       </div>
                     </div>
-                    <span className={`rounded px-2 py-0.5 text-xs font-semibold ${
-                      act.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                      act.status === 'In Progress' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
-                      act.status === 'Review' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20' :
-                      'bg-slate-500/10 text-slate-400 border border-slate-500/20'
-                    }`}>
+                    <Badge variant={
+                      act.status === 'Completed' ? 'emerald' :
+                      act.status === 'In Progress' ? 'indigo' :
+                      act.status === 'Review' ? 'violet' :
+                      'slate'
+                    } glow={act.status === 'Completed' || act.status === 'In Progress'}>
                       {act.status}
-                    </span>
+                    </Badge>
                   </div>
                 ))
               ) : (
-                <div className="flex h-64 items-center justify-center text-slate-500 text-sm">
-                  No task activity recorded yet.
-                </div>
+                <EmptyState
+                  icon={Inbox}
+                  title="No Task Activity"
+                  description="Workspace tasks are quiet. Activity logs will appear as team members transition task states."
+                />
               )}
             </div>
             {totalTasks > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-900 text-center">
-                <Link href="/dashboard/tasks" className="inline-flex items-center space-x-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition">
+              <div className="mt-4 pt-4 border-t border-slate-900/60 text-center">
+                <Link href="/dashboard/tasks" className="inline-flex items-center space-x-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
                   <span>Manage Task Board</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     );
@@ -232,85 +221,59 @@ export default function DashboardPage() {
       <div className="space-y-8">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Welcome, {user?.name}</h1>
-          <p className="text-sm text-slate-400">Here's a digest of your assigned projects, tasks, and deadlines.</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight leading-tight">Welcome back, {user?.name}</h1>
+          <p className="text-sm text-slate-400 mt-1">Here's a digest of your assigned projects, tasks, and deadlines.</p>
         </div>
 
         {/* 3 Metric Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="relative overflow-hidden rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl transition hover:border-slate-800">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-indigo-500/5 blur-xl"></div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">My Projects</p>
-                <h3 className="mt-2 text-3xl font-bold text-white">{assignedProjectsCount}</h3>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <FolderGit2 className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center space-x-1.5 text-xs text-indigo-400">
-              <span>Assigned spaces & team workspaces</span>
-            </div>
-          </div>
-
-          <div className="relative overflow-hidden rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl transition hover:border-slate-800">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-violet-500/5 blur-xl"></div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">Pending Tasks</p>
-                <h3 className="mt-2 text-3xl font-bold text-white">{tasksOverview.pending}</h3>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400 border border-violet-500/20">
-                <AlertCircle className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center space-x-1.5 text-xs text-violet-400">
-              <span>{tasksOverview.breakdown.inProgress} active in-progress items</span>
-            </div>
-          </div>
-
-          <div className="relative overflow-hidden rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl transition hover:border-slate-800">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-emerald-500/5 blur-xl"></div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wider text-slate-400">Completed</p>
-                <h3 className="mt-2 text-3xl font-bold text-white">{tasksOverview.completed}</h3>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <CheckCircle2 className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center space-x-1.5 text-xs text-emerald-400">
-              <span>{tasksOverview.total} total items assigned</span>
-            </div>
-          </div>
+          <StatsCard
+            title="My Projects"
+            value={assignedProjectsCount}
+            icon={FolderGit2}
+            color="indigo"
+            description="Assigned spaces & team workspaces"
+          />
+          <StatsCard
+            title="Pending Tasks"
+            value={tasksOverview.pending}
+            icon={AlertCircle}
+            color="violet"
+            description={`${tasksOverview.breakdown.inProgress} active in-progress items`}
+          />
+          <StatsCard
+            title="Completed"
+            value={tasksOverview.completed}
+            icon={CheckCircle2}
+            color="emerald"
+            description={`${tasksOverview.total} total items assigned`}
+          />
         </div>
 
         {/* Details Grid */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Priority Spread */}
-          <div className="rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl space-y-6">
-            <h3 className="text-lg font-bold text-white">Priority & States</h3>
+          <Card className="space-y-6">
+            <h3 className="text-lg font-bold text-white tracking-tight">Priority & States</h3>
             
             {/* Task state chart mockup */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="rounded-lg bg-slate-900/40 border border-slate-900 p-4 text-center">
-                <span className="rounded bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-400 border border-red-500/20">HIGH</span>
-                <p className="text-2xl font-bold text-white mt-2">{priorityDistribution.high}</p>
+              <div className="rounded-xl bg-slate-900/40 border border-slate-900 p-4 text-center flex flex-col items-center justify-between">
+                <Badge variant="red" glow className="text-[10px] px-2 py-0">HIGH</Badge>
+                <p className="text-2xl font-bold text-white mt-2.5 leading-none">{priorityDistribution.high}</p>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-slate-900 p-4 text-center">
-                <span className="rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">MEDIUM</span>
-                <p className="text-2xl font-bold text-white mt-2">{priorityDistribution.medium}</p>
+              <div className="rounded-xl bg-slate-900/40 border border-slate-900 p-4 text-center flex flex-col items-center justify-between">
+                <Badge variant="amber" glow className="text-[10px] px-2 py-0">MEDIUM</Badge>
+                <p className="text-2xl font-bold text-white mt-2.5 leading-none">{priorityDistribution.medium}</p>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-slate-900 p-4 text-center">
-                <span className="rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] font-bold text-indigo-400 border border-indigo-500/20">LOW</span>
-                <p className="text-2xl font-bold text-white mt-2">{priorityDistribution.low}</p>
+              <div className="rounded-xl bg-slate-900/40 border border-slate-900 p-4 text-center flex flex-col items-center justify-between">
+                <Badge variant="indigo" glow className="text-[10px] px-2 py-0">LOW</Badge>
+                <p className="text-2xl font-bold text-white mt-2.5 leading-none">{priorityDistribution.low}</p>
               </div>
             </div>
 
-            <div className="space-y-3 pt-4 border-t border-slate-900">
-              <h4 className="text-sm font-bold text-white">State breakdown</h4>
+            <div className="space-y-3 pt-4 border-t border-slate-900/60">
+              <h4 className="text-sm font-bold text-white tracking-tight">State Breakdown</h4>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-400">To Do</span>
                 <span className="font-semibold text-white">{tasksOverview.breakdown.todo}</span>
@@ -328,51 +291,53 @@ export default function DashboardPage() {
                 <span className="font-semibold text-emerald-400">{tasksOverview.breakdown.completed}</span>
               </div>
             </div>
-          </div>
+          </Card>
 
           {/* Upcoming Deadlines */}
-          <div className="rounded-xl border border-slate-900 bg-slate-900/25 p-6 backdrop-blur-xl flex flex-col">
-            <h3 className="text-lg font-bold text-white mb-4">Upcoming Deadlines</h3>
+          <Card className="flex flex-col">
+            <h3 className="text-lg font-bold text-white tracking-tight mb-4">Upcoming Deadlines</h3>
             <div className="flex-1 space-y-4">
               {upcomingDeadlines && upcomingDeadlines.length > 0 ? (
                 upcomingDeadlines.map((deadline: any) => (
-                  <div key={deadline.id} className="flex items-center justify-between rounded-lg bg-slate-900/40 border border-slate-900/60 p-4 hover:border-slate-800 transition">
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-semibold text-white">{deadline.title}</h4>
-                      <p className="text-xs text-slate-400">
+                  <div key={deadline.id} className="flex items-center justify-between rounded-xl bg-slate-900/40 border border-slate-900/80 p-4 hover:border-slate-800 transition-colors">
+                    <div className="space-y-1.5 min-w-0">
+                      <h4 className="text-sm font-semibold text-white truncate leading-snug">{deadline.title}</h4>
+                      <p className="text-xs text-slate-400 truncate">
                         Project: <strong className="text-slate-300">{deadline.projectName}</strong>
                       </p>
                     </div>
-                    <div className="flex flex-col items-end space-y-1.5">
+                    <div className="flex flex-col items-end space-y-2 shrink-0 ml-4">
                       <div className="flex items-center space-x-1 text-xs text-slate-400">
                         <Calendar className="h-3.5 w-3.5 text-slate-500" />
                         <span>{new Date(deadline.dueDate).toLocaleDateString()}</span>
                       </div>
-                      <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                        deadline.priority === 'High' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                        deadline.priority === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                        'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                      }`}>
+                      <Badge variant={
+                        deadline.priority === 'High' ? 'red' :
+                        deadline.priority === 'Medium' ? 'amber' :
+                        'indigo'
+                      } className="text-[10px] px-2 py-0">
                         {deadline.priority.toUpperCase()}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="flex h-64 items-center justify-center text-slate-500 text-sm">
-                  Great job! You have no upcoming deadlines.
-                </div>
+                <EmptyState
+                  icon={CheckCircle2}
+                  title="No Upcoming Deadlines"
+                  description="Outstanding work is fully up to date. Rest easy or take on new tasks from the board."
+                />
               )}
             </div>
             {tasksOverview.total > 0 && (
-              <div className="mt-4 pt-4 border-t border-slate-900 text-center">
-                <Link href="/dashboard/tasks" className="inline-flex items-center space-x-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition">
+              <div className="mt-4 pt-4 border-t border-slate-900/60 text-center">
+                <Link href="/dashboard/tasks" className="inline-flex items-center space-x-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
                   <span>Go to My Task Board</span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
               </div>
             )}
-          </div>
+          </Card>
         </div>
       </div>
     );

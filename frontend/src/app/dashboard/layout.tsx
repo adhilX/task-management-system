@@ -13,7 +13,10 @@ import {
   LogOut,
   Menu,
   X,
+  Settings,
 } from 'lucide-react';
+import Breadcrumbs from '@/components/shared/breadcrumbs';
+import UserMenu from '@/components/shared/user-menu';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
@@ -50,6 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: 'Projects', href: '/dashboard/projects', icon: FolderGit2 },
     { name: 'Task Board', href: '/dashboard/tasks', icon: KanbanSquare },
     { name: 'My Profile', href: '/dashboard/profile', icon: UserSquare2 },
+    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];
 
   return (
@@ -108,11 +112,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile Sidebar Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden bg-slate-950/60 backdrop-blur-sm">
-          <div className="relative flex w-full max-w-xs flex-col bg-slate-900 p-6 shadow-2xl animate-in slide-in-from-left duration-200">
+        <div 
+          className="fixed inset-0 z-50 flex lg:hidden bg-slate-950/60 backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div 
+            className="relative flex w-full max-w-xs flex-col bg-slate-900 p-6 shadow-2xl animate-in slide-in-from-left duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="absolute top-4 right-4 rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+              className="absolute top-4 right-4 rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer"
             >
               <X className="h-6 w-6" />
             </button>
@@ -166,23 +176,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Top Header */}
-        <header className="flex h-16 items-center justify-between border-b border-slate-900 bg-slate-950 px-6 lg:bg-slate-950/30 lg:backdrop-blur-xl">
+        <header className="flex h-16 items-center justify-between border-b border-slate-900 bg-slate-950 px-6 lg:bg-slate-950/30 lg:backdrop-blur-xl sticky top-0 z-30">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="rounded-lg p-2 text-slate-400 hover:bg-slate-900 hover:text-white lg:hidden"
+              className="rounded-lg p-2 text-slate-400 hover:bg-slate-900 hover:text-white lg:hidden cursor-pointer"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <h1 className="text-xl font-bold tracking-tight text-white capitalize">
-              {pathname.split('/').pop() === 'dashboard' ? 'Overview' : pathname.split('/').pop()?.replace('-', ' ')}
-            </h1>
+            <div className="flex flex-col">
+              <h1 className="text-lg font-bold tracking-tight text-white capitalize leading-tight">
+                {pathname.split('/').pop() === 'dashboard' ? 'Overview' : pathname.split('/').pop()?.replace('-', ' ')}
+              </h1>
+              <Breadcrumbs />
+            </div>
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="rounded-full bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 text-xs font-medium text-indigo-400">
-              {user.role} Space
-            </span>
+            <UserMenu />
           </div>
         </header>
 

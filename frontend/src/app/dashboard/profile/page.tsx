@@ -18,6 +18,9 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
+import { Card } from '@/components/shared/card';
+import Badge from '@/components/shared/badge';
+
 const profileSchema = zod.object({
   name: zod.string().min(2, 'Name must be at least 2 characters'),
   email: zod.string().email('Please enter a valid email address'),
@@ -36,7 +39,6 @@ export default function ProfilePage() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -77,27 +79,27 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-white">Profile Workspace</h2>
-        <p className="text-sm text-slate-400">View role credentials and modify your contact details.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-white leading-tight">Profile Workspace</h2>
+        <p className="text-sm text-slate-400 mt-0.5">View role credentials and modify your contact details.</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Column: Read-Only System Details Card */}
-        <div className="rounded-xl border border-slate-900 bg-slate-900/20 p-6 backdrop-blur-xl space-y-6 lg:col-span-1">
-          <div className="flex flex-col items-center text-center space-y-4">
+        <Card className="space-y-6 lg:col-span-1 flex flex-col justify-between">
+          <div className="flex flex-col items-center text-center space-y-4 pt-4">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-800 text-slate-300">
               <UserSquare2 className="h-10 w-10 text-indigo-400" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">{user.name}</h3>
+              <h3 className="text-lg font-bold text-white tracking-tight">{user.name}</h3>
               <p className="text-xs text-slate-500">{user.email}</p>
             </div>
-            <span className="rounded-full bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-400">
+            <Badge variant="indigo" glow>
               {user.role} Account
-            </span>
+            </Badge>
           </div>
 
-          <div className="space-y-4 border-t border-slate-900 pt-6 text-xs">
+          <div className="space-y-4 border-t border-slate-900/60 pt-6 text-xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 text-slate-400">
                 <Shield className="h-4 w-4 text-slate-500" />
@@ -120,11 +122,11 @@ export default function ProfilePage() {
               <span className="font-bold text-white">{new Date(user.createdAt).toLocaleDateString()}</span>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Right Column: Update Profile Settings Form */}
-        <div className="rounded-xl border border-slate-900 bg-slate-900/20 p-6 backdrop-blur-xl lg:col-span-2 space-y-6">
-          <h3 className="text-lg font-bold text-white">Profile Settings</h3>
+        <Card className="lg:col-span-2 space-y-6">
+          <h3 className="text-lg font-bold text-white tracking-tight">Profile Settings</h3>
 
           {successMsg && (
             <div className="flex items-center space-x-2 rounded-lg bg-emerald-950/50 border border-emerald-500/50 p-4 text-sm text-emerald-400">
@@ -151,7 +153,7 @@ export default function ProfilePage() {
                   {...register('name')}
                   type="text"
                   placeholder="Jane Doe"
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
+                  className="w-full rounded-lg border border-slate-850 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
                 />
                 {errors.name && (
                   <p className="text-xs text-red-400">{errors.name.message}</p>
@@ -167,7 +169,7 @@ export default function ProfilePage() {
                   {...register('email')}
                   type="email"
                   placeholder="jane.doe@company.com"
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
+                  className="w-full rounded-lg border border-slate-850 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
                 />
                 {errors.email && (
                   <p className="text-xs text-red-400">{errors.email.message}</p>
@@ -185,7 +187,7 @@ export default function ProfilePage() {
                   {...register('department')}
                   type="text"
                   placeholder="Engineering"
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
+                  className="w-full rounded-lg border border-slate-850 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
                 />
                 {errors.department && (
                   <p className="text-xs text-red-400">{errors.department.message}</p>
@@ -204,7 +206,7 @@ export default function ProfilePage() {
                   {...register('password')}
                   type="password"
                   placeholder="••••••••"
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
+                  className="w-full rounded-lg border border-slate-850 bg-slate-950 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
                 />
                 {errors.password && (
                   <p className="text-xs text-red-400">{errors.password.message}</p>
@@ -212,17 +214,17 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-slate-900">
+            <div className="flex justify-end pt-4 border-t border-slate-900/60">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition disabled:opacity-50"
+                className="rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition disabled:opacity-50 cursor-pointer"
               >
-                {isSubmitting ? 'Saving changes...' : 'Save Settings'}
+                {isSubmitting ? 'Saving Changes...' : 'Save Settings'}
               </button>
             </div>
           </form>
-        </div>
+        </Card>
       </div>
     </div>
   );

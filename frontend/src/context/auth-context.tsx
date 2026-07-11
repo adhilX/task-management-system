@@ -57,8 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: any) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      const { token } = response.data;
-      if (typeof window !== 'undefined') {
+      const token = response.data.accessToken || response.data.token;
+      if (typeof window !== 'undefined' && token) {
         localStorage.setItem('token', token);
       }
       // Fetch full profile immediately

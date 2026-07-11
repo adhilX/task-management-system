@@ -23,9 +23,20 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle authentication failures
+// Response interceptor to handle authentication failures and unwrap NestJS responses
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Automatically unwrap the standard response wrapper { success: true, data: ... } if present
+    if (
+      response.data &&
+      typeof response.data === 'object' &&
+      response.data.success === true &&
+      'data' in response.data
+    ) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   (error) => {
     if (error.response && error.response.status === 401) {
       if (typeof window !== 'undefined') {
