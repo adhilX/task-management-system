@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { JwtService } from '../../security/jwt.service';
-import { UnauthorizedException } from '../../../domain/errors/http.exception';
+import { ITokenService } from '../../../application/services/token-service.interface';
+import { UnauthorizedException } from '../../../domain/errors/domain.exception';
 
-export const createAuthMiddleware = (jwtService: JwtService) => {
+export const createAuthMiddleware = (tokenService: ITokenService) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       const authHeader = req.headers.authorization;
@@ -11,7 +11,7 @@ export const createAuthMiddleware = (jwtService: JwtService) => {
       }
 
       const token = authHeader.split(' ')[1];
-      const decoded = jwtService.verify(token);
+      const decoded = tokenService.verify(token);
       
       // Attach user payload to request
       (req as any).user = {

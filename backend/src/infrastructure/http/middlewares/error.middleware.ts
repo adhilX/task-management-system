@@ -1,5 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { HttpException } from '../../../domain/errors/http.exception';
+import {
+  DomainException,
+  BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
+  NotFoundException,
+  ConflictException,
+} from '../../../domain/errors/domain.exception';
 
 export const errorMiddleware = (
   error: any,
@@ -7,9 +14,17 @@ export const errorMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const status = error instanceof HttpException ? error.status : 500;
-  const errorName = error.name || 'Error';
+  let status = 500;
+  let errorName = error.name || 'Error';
   const rawMessage = error.message || 'Internal server error';
+
+  if (error instanceof DomainException) {
+    if (error instanceof BadRequestException) status = 400;
+    else if (error instanceof UnauthorizedException) status = 401;
+    else if (error instanceof ForbiddenException) status = 403;
+    else if (error instanceof NotFoundException) status = 404;
+    else if (error instanceof ConflictException) status = 409;
+  }
   
   // Format message as array to match NestJS filter output
   const message = Array.isArray(rawMessage) ? rawMessage : [rawMessage];

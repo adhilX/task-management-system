@@ -2,7 +2,7 @@ import { ITaskRepository } from '../../../domain/repositories/task-repository.in
 import { IProjectRepository } from '../../../domain/repositories/project-repository.interface';
 import { Task } from '../../../domain/entities/task.entity';
 import { UserRole } from '../../../domain/enums/user-role.enum';
-import { ForbiddenException, NotFoundException } from '../../../domain/errors/http.exception';
+import { ForbiddenException, NotFoundException } from '../../../domain/errors/domain.exception';
 
 export class FindAllTasksUseCase {
   constructor(

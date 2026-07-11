@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserRole } from '../../../domain/enums/user-role.enum';
-import { ForbiddenException } from '../../../domain/errors/http.exception';
+import { ForbiddenException } from '../../../domain/errors/domain.exception';
 
 export const rolesMiddleware = (...allowedRoles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {

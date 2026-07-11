@@ -2,13 +2,13 @@ import { IUserRepository } from '../../../domain/repositories/user-repository.in
 import { User } from '../../../domain/entities/user.entity';
 import { UserRole } from '../../../domain/enums/user-role.enum';
 import { UserStatus } from '../../../domain/enums/user-status.enum';
-import { ForbiddenException, ConflictException } from '../../../domain/errors/http.exception';
-import { BcryptService } from '../../../infrastructure/security/bcrypt.service';
+import { ForbiddenException, ConflictException } from '../../../domain/errors/domain.exception';
+import { IPasswordHasher } from '../../services/password-hasher.interface';
 
 export class RegisterUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly bcryptService: BcryptService
+    private readonly passwordHasher: IPasswordHasher
   ) {}
 
   async execute(dto: any): Promise<User> {
@@ -22,7 +22,7 @@ export class RegisterUseCase {
       throw new ConflictException('Email is already registered');
     }
 
-    const hashedPassword = await this.bcryptService.hash(dto.password);
+    const hashedPassword = await this.passwordHasher.hash(dto.password);
     return this.userRepository.create({
       name: dto.name,
       email: dto.email,

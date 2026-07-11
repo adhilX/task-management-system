@@ -1,6 +1,6 @@
 import { IProjectRepository } from '../../../domain/repositories/project-repository.interface';
 import { Project } from '../../../domain/entities/project.entity';
-import { NotFoundException } from '../../../domain/errors/http.exception';
+import { NotFoundException } from '../../../domain/errors/domain.exception';
 
 export class DeleteProjectUseCase {
   constructor(private readonly projectRepository: IProjectRepository) {}

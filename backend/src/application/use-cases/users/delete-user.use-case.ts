@@ -1,6 +1,6 @@
 import { IUserRepository } from '../../../domain/repositories/user-repository.interface';
 import { User } from '../../../domain/entities/user.entity';
-import { NotFoundException } from '../../../domain/errors/http.exception';
+import { NotFoundException } from '../../../domain/errors/domain.exception';
 
 export class DeleteUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

@@ -1,6 +1,6 @@
 import { ITaskRepository } from '../../../domain/repositories/task-repository.interface';
 import { Task } from '../../../domain/entities/task.entity';
-import { NotFoundException } from '../../../domain/errors/http.exception';
+import { NotFoundException } from '../../../domain/errors/domain.exception';
 
 export class DeleteTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}

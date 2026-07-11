@@ -1,12 +1,12 @@
 import { IUserRepository } from '../../../domain/repositories/user-repository.interface';
 import { User } from '../../../domain/entities/user.entity';
-import { ConflictException, NotFoundException } from '../../../domain/errors/http.exception';
-import { BcryptService } from '../../../infrastructure/security/bcrypt.service';
+import { ConflictException, NotFoundException } from '../../../domain/errors/domain.exception';
+import { IPasswordHasher } from '../../services/password-hasher.interface';
 
 export class UpdateUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly bcryptService: BcryptService
+    private readonly passwordHasher: IPasswordHasher
   ) {}
 
   async execute(id: string, dto: any): Promise<User> {
@@ -24,7 +24,7 @@ export class UpdateUserUseCase {
 
     const updateData = { ...dto };
     if (dto.password) {
-      updateData.password = await this.bcryptService.hash(dto.password);
+      updateData.password = await this.passwordHasher.hash(dto.password);
     }
 
     const updatedUser = await this.userRepository.update(id, updateData);

@@ -3,7 +3,7 @@ import { IProjectRepository } from '../../../domain/repositories/project-reposit
 import { IUserRepository } from '../../../domain/repositories/user-repository.interface';
 import { Task } from '../../../domain/entities/task.entity';
 import { UserRole } from '../../../domain/enums/user-role.enum';
-import { ForbiddenException, NotFoundException } from '../../../domain/errors/http.exception';
+import { ForbiddenException, NotFoundException } from '../../../domain/errors/domain.exception';
 
 export class UpdateTaskUseCase {
   constructor(

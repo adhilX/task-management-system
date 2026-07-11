@@ -1,14 +1,14 @@
 import { IUserRepository } from '../../../domain/repositories/user-repository.interface';
-import { UnauthorizedException } from '../../../domain/errors/http.exception';
+import { UnauthorizedException } from '../../../domain/errors/domain.exception';
 import { UserStatus } from '../../../domain/enums/user-status.enum';
-import { BcryptService } from '../../../infrastructure/security/bcrypt.service';
-import { JwtService } from '../../../infrastructure/security/jwt.service';
+import { IPasswordHasher } from '../../services/password-hasher.interface';
+import { ITokenService } from '../../services/token-service.interface';
 
 export class LoginUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly bcryptService: BcryptService,
-    private readonly jwtService: JwtService
+    private readonly passwordHasher: IPasswordHasher,
+    private readonly tokenService: ITokenService
   ) {}
 
   async execute(dto: any) {
@@ -17,7 +17,7 @@ export class LoginUseCase {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isPasswordValid = await this.bcryptService.compare(dto.password, user.password);
+    const isPasswordValid = await this.passwordHasher.compare(dto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -35,7 +35,7 @@ export class LoginUseCase {
         role: user.role,
         department: user.department,
       },
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.tokenService.sign(payload),
     };
   }
 }

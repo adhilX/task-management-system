@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Schema } from 'joi';
-import { BadRequestException } from '../../../domain/errors/http.exception';
+import { BadRequestException } from '../../../domain/errors/domain.exception';
 
 export const validateBody = (schema: Schema) => {
   return (req: Request, res: Response, next: NextFunction) => {

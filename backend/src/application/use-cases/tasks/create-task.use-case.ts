@@ -2,7 +2,7 @@ import { ITaskRepository } from '../../../domain/repositories/task-repository.in
 import { IProjectRepository } from '../../../domain/repositories/project-repository.interface';
 import { IUserRepository } from '../../../domain/repositories/user-repository.interface';
 import { Task } from '../../../domain/entities/task.entity';
-import { BadRequestException, NotFoundException } from '../../../domain/errors/http.exception';
+import { BadRequestException, NotFoundException } from '../../../domain/errors/domain.exception';
 
 export class CreateTaskUseCase {
   constructor(
