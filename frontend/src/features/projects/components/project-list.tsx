@@ -47,7 +47,7 @@ export function ProjectList() {
   const { data: usersData } = useQuery({
     queryKey: ['usersListSelect'],
     queryFn: async () => {
-      const res = await employeeService.getEmployees({ page: 1, limit: 200 });
+      const res = await employeeService.getEmployees({ page: 1, limit: 100 });
       return res.users;
     },
   });

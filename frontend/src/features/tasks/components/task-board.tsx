@@ -46,7 +46,7 @@ export function TaskBoard() {
     queryFn: async () => {
       return taskService.getTasks({
         page: 1,
-        limit: 200,
+        limit: 100,
         projectId: projectIdFilter || undefined,
         priority: priorityFilter || undefined,
         search: search || undefined,
