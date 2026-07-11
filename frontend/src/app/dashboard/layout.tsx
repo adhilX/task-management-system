@@ -15,8 +15,8 @@ import {
   X,
   Settings,
 } from 'lucide-react';
-import Breadcrumbs from '@/components/shared/breadcrumbs';
-import UserMenu from '@/components/shared/user-menu';
+import Breadcrumbs from '@/components/layout/breadcrumbs';
+import UserMenu from '@/components/layout/user-menu';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();

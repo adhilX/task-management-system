@@ -19,6 +19,7 @@ const UserSchema = new Schema(
       default: UserStatus.ACTIVE,
     },
     department: { type: String, trim: true, default: '' },
+    refreshToken: { type: String, select: false },
   },
   {
     timestamps: true,

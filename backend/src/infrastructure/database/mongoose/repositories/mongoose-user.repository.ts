@@ -27,9 +27,19 @@ export class MongooseUserRepository implements IUserRepository {
     return userObj as User;
   }
 
-  async findById(id: string): Promise<User | null> {
-    const doc = await UserModel.findById(id).exec();
-    return doc ? (doc.toJSON() as User) : null;
+  async findById(id: string, selectRefreshToken = false): Promise<User | null> {
+    const query = UserModel.findById(id);
+    if (selectRefreshToken) {
+      query.select('+refreshToken');
+    }
+    const doc = await query.exec();
+    if (!doc) return null;
+
+    const userObj = doc.toJSON();
+    if (selectRefreshToken && doc.refreshToken) {
+      userObj.refreshToken = doc.refreshToken;
+    }
+    return userObj as User;
   }
 
   async findAll(params: {

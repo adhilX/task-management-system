@@ -2,17 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import api from '../lib/api';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'Admin' | 'Employee';
-  status: 'Active' | 'Inactive';
-  department?: string;
-  createdAt: string;
-}
+import { authService } from '@/services/auth.service';
+import { User } from '@/types';
 
 interface AuthContextType {
   user: User | null;
@@ -32,8 +23,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await api.get('/auth/me');
-      setUser(response.data);
+      const data = await authService.getMe();
+      setUser(data);
     } catch (error) {
       console.error('Failed to fetch user', error);
       if (typeof window !== 'undefined') {
@@ -56,26 +47,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (credentials: any) => {
     try {
-      const response = await api.post('/auth/login', credentials);
-      const token = response.data.accessToken || response.data.token;
+      const data = await authService.login(credentials);
+      const token = data.accessToken;
       if (typeof window !== 'undefined' && token) {
         localStorage.setItem('token', token);
       }
       // Fetch full profile immediately
-      const profileResponse = await api.get('/auth/me');
-      setUser(profileResponse.data);
+      const profile = await authService.getMe();
+      setUser(profile);
       router.push('/dashboard');
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.message || 'Login failed';
       throw new Error(message);
     }
   };
 
   const register = async (data: any) => {
     try {
-      await api.post('/auth/register', data);
+      await authService.register(data);
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Registration failed';
+      const message = error.message || 'Registration failed';
       throw new Error(message);
     }
   };
@@ -90,8 +81,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      const response = await api.get('/auth/me');
-      setUser(response.data);
+      const data = await authService.getMe();
+      setUser(data);
     } catch (error) {
       console.error('Failed to refresh user', error);
     }

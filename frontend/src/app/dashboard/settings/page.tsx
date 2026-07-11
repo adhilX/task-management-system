@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { Card } from '@/components/shared/card';
-import Badge from '@/components/shared/badge';
+import { Card } from '@/components/ui/card';
+import Badge from '@/components/ui/badge';
 import { Settings, Shield, Bell, Key, Globe, CheckCircle2 } from 'lucide-react';
 
 export default function SettingsPage() {

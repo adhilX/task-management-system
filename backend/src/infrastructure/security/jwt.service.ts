@@ -7,9 +7,9 @@ export class JwtService implements ITokenService {
     private readonly expiresIn: string
   ) {}
 
-  sign(payload: any): string {
+  sign(payload: any, options?: { expiresIn?: string }): string {
     return jwt.sign(payload, this.secret, {
-      expiresIn: this.expiresIn as any,
+      expiresIn: (options?.expiresIn || this.expiresIn) as any,
     });
   }
 

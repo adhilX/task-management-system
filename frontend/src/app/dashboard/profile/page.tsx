@@ -5,7 +5,7 @@ import { useAuth } from '@/context/auth-context';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as zod from 'zod';
-import api from '@/lib/api';
+import api from '@/services/api-client';
 import {
   UserSquare2,
   Lock,
@@ -18,8 +18,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
-import { Card } from '@/components/shared/card';
-import Badge from '@/components/shared/badge';
+import { Card } from '@/components/ui/card';
+import Badge from '@/components/ui/badge';
 
 const profileSchema = zod.object({
   name: zod.string().min(2, 'Name must be at least 2 characters'),

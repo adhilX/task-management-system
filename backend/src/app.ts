@@ -1,14 +1,14 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './infrastructure/http/swagger';
-import { createAuthRouter } from './infrastructure/http/routes/auth.routes';
-import { createUserRouter } from './infrastructure/http/routes/user.routes';
-import { createProjectRouter } from './infrastructure/http/routes/project.routes';
-import { createTaskRouter } from './infrastructure/http/routes/task.routes';
-import { createDashboardRouter } from './infrastructure/http/routes/dashboard.routes';
-import { createAuthMiddleware } from './infrastructure/http/middlewares/auth.middleware';
-import { errorMiddleware } from './infrastructure/http/middlewares/error.middleware';
+import { swaggerSpec } from './presentation/swagger';
+import { createAuthRouter } from './presentation/routes/auth.routes';
+import { createUserRouter } from './presentation/routes/user.routes';
+import { createProjectRouter } from './presentation/routes/project.routes';
+import { createTaskRouter } from './presentation/routes/task.routes';
+import { createDashboardRouter } from './presentation/routes/dashboard.routes';
+import { createAuthMiddleware } from './presentation/middlewares/auth.middleware';
+import { errorMiddleware } from './presentation/middlewares/error.middleware';
 import { MongooseUserRepository } from './infrastructure/database/mongoose/repositories/mongoose-user.repository';
 import { MongooseProjectRepository } from './infrastructure/database/mongoose/repositories/mongoose-project.repository';
 import { MongooseTaskRepository } from './infrastructure/database/mongoose/repositories/mongoose-task.repository';
@@ -50,7 +50,7 @@ export function createApp(config: {
   });
 
   // Routers
-  app.use('/api/auth', createAuthRouter(userRepository, bcryptService, jwtService));
+  app.use('/api/auth', createAuthRouter(userRepository, bcryptService, jwtService, authMiddleware));
   app.use('/api/users', createUserRouter(userRepository, bcryptService, authMiddleware));
   app.use('/api/projects', createProjectRouter(projectRepository, authMiddleware));
   app.use('/api/tasks', createTaskRouter(taskRepository, projectRepository, userRepository, authMiddleware));
