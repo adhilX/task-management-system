@@ -27,3 +27,10 @@ export const findAllUsersQuerySchema = Joi.object({
   role: Joi.string().valid(...Object.values(UserRole)).optional(),
   status: Joi.string().valid(...Object.values(UserStatus)).optional(),
 });
+
+export const inviteEmployeeSchema = Joi.object({
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  department: Joi.string().allow('').optional(),
+});
+

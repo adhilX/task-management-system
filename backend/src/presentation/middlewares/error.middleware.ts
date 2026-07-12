@@ -59,7 +59,5 @@ export const errorMiddleware = (
     statusCode: finalStatus,
     error: finalError,
     message: finalMessage,
-    timestamp: new Date().toISOString(),
-    path: req.originalUrl || req.url,
   });
 };

@@ -27,10 +27,13 @@ export class MongooseUserRepository implements IUserRepository {
     return userObj as User;
   }
 
-  async findById(id: string, selectRefreshToken = false): Promise<User | null> {
+  async findById(id: string, selectRefreshToken = false, selectPassword = false): Promise<User | null> {
     const query = UserModel.findById(id);
     if (selectRefreshToken) {
       query.select('+refreshToken');
+    }
+    if (selectPassword) {
+      query.select('+password');
     }
     const doc = await query.exec();
     if (!doc) return null;
@@ -38,6 +41,9 @@ export class MongooseUserRepository implements IUserRepository {
     const userObj = doc.toJSON();
     if (selectRefreshToken && doc.refreshToken) {
       userObj.refreshToken = doc.refreshToken;
+    }
+    if (selectPassword && doc.password) {
+      userObj.password = doc.password;
     }
     return userObj as User;
   }
@@ -95,5 +101,10 @@ export class MongooseUserRepository implements IUserRepository {
 
   async countAll(): Promise<number> {
     return UserModel.countDocuments().exec();
+  }
+
+  async findByInvitationToken(token: string): Promise<User | null> {
+    const doc = await UserModel.findOne({ invitationToken: token }).select('+invitationToken').exec();
+    return doc ? (doc.toJSON() as User) : null;
   }
 }

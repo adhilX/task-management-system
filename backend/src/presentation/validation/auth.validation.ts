@@ -23,4 +23,18 @@ export const loginSchema = Joi.object({
   password: Joi.string().required().messages({
     'any.required': 'password is required',
   }),
+  portal: Joi.string().valid('admin', 'employee').default('employee').optional().messages({
+    'any.only': 'portal must be either admin or employee',
+  }),
 });
+
+export const adminLoginSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    'any.required': 'email is required',
+    'string.email': 'email must be a valid email',
+  }),
+  password: Joi.string().required().messages({
+    'any.required': 'password is required',
+  }),
+});
+

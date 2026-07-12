@@ -1,7 +1,8 @@
 import * as crypto from 'crypto';
 import { IUserRepository } from '../../../domain/repositories/user-repository.interface';
-import { UnauthorizedException } from '../../../domain/errors/domain.exception';
+import { UnauthorizedException, ForbiddenException } from '../../../domain/errors/domain.exception';
 import { UserStatus } from '../../../domain/enums/user-status.enum';
+import { UserRole } from '../../../domain/enums/user-role.enum';
 import { IPasswordHasher } from '../../services/password-hasher.interface';
 import { ITokenService } from '../../services/token-service.interface';
 
@@ -27,9 +28,17 @@ export class LoginUseCase {
       throw new UnauthorizedException('Your account is deactivated');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    if (dto.portal === 'admin' && user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('You are not authorized to access the Admin Portal');
+    }
+
+    if (dto.portal === 'employee' && user.role !== UserRole.EMPLOYEE) {
+      throw new ForbiddenException('You are not authorized to access the Employee Portal');
+    }
+
+    const payload = { sub: user.id, email: user.email, role: user.role, roleType: user.role };
     const accessToken = this.tokenService.sign(payload);
-    const refreshToken = this.tokenService.sign(payload, { expiresIn: '7d' });
+    const refreshToken = this.tokenService.signRefresh(payload);
 
     const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
     await this.userRepository.update(user.id!, { refreshToken: hashedRefreshToken });

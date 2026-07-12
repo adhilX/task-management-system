@@ -4,6 +4,7 @@ import { DeleteUserUseCase } from '../../application/use-cases/users/delete-user
 import { FindAllUsersUseCase } from '../../application/use-cases/users/find-all-users.use-case';
 import { FindOneUserUseCase } from '../../application/use-cases/users/find-one-user.use-case';
 import { UpdateUserUseCase } from '../../application/use-cases/users/update-user.use-case';
+import { InviteEmployeeUseCase } from '../../application/use-cases/users/invite-employee.use-case';
 import { sendSuccess } from '../helpers/response.helper';
 
 export class UserController {
@@ -12,8 +13,18 @@ export class UserController {
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly findAllUsersUseCase: FindAllUsersUseCase,
     private readonly findOneUserUseCase: FindOneUserUseCase,
-    private readonly updateUserUseCase: UpdateUserUseCase
+    private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly inviteEmployeeUseCase: InviteEmployeeUseCase
   ) {}
+
+  invite = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.inviteEmployeeUseCase.execute(req.body);
+      return sendSuccess(res, result, 'Employee invited successfully', 201);
+    } catch (error) {
+      next(error);
+    }
+  };
 
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {

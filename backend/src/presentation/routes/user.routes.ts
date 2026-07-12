@@ -5,16 +5,19 @@ import { DeleteUserUseCase } from '../../application/use-cases/users/delete-user
 import { FindAllUsersUseCase } from '../../application/use-cases/users/find-all-users.use-case';
 import { FindOneUserUseCase } from '../../application/use-cases/users/find-one-user.use-case';
 import { UpdateUserUseCase } from '../../application/use-cases/users/update-user.use-case';
+import { InviteEmployeeUseCase } from '../../application/use-cases/users/invite-employee.use-case';
 import { MongooseUserRepository } from '../../infrastructure/database/mongoose/repositories/mongoose-user.repository';
 import { BcryptService } from '../../infrastructure/security/bcrypt.service';
+import { EmailService } from '../../infrastructure/email/email.service';
 import { UserRole } from '../../domain/enums/user-role.enum';
 import { rolesMiddleware } from '../middlewares/roles.middleware';
 import { validateBody, validateQuery } from '../middlewares/validation.middleware';
-import { createUserSchema, updateUserSchema, findAllUsersQuerySchema } from '../validation/user.validation';
+import { createUserSchema, updateUserSchema, findAllUsersQuerySchema, inviteEmployeeSchema } from '../validation/user.validation';
 
 export const createUserRouter = (
   userRepository: MongooseUserRepository,
   bcryptService: BcryptService,
+  emailService: EmailService,
   authMiddleware: any
 ): Router => {
   const router = Router();
@@ -24,18 +27,23 @@ export const createUserRouter = (
   const findAllUsersUseCase = new FindAllUsersUseCase(userRepository);
   const findOneUserUseCase = new FindOneUserUseCase(userRepository);
   const updateUserUseCase = new UpdateUserUseCase(userRepository, bcryptService);
+  const inviteEmployeeUseCase = new InviteEmployeeUseCase(userRepository, emailService);
 
   const controller = new UserController(
     createUserUseCase,
     deleteUserUseCase,
     findAllUsersUseCase,
     findOneUserUseCase,
-    updateUserUseCase
+    updateUserUseCase,
+    inviteEmployeeUseCase
   );
 
   // Apply Auth and Admin checks globally to all user routes
   router.use(authMiddleware);
   router.use(rolesMiddleware(UserRole.ADMIN));
+
+  router.post('/invite', validateBody(inviteEmployeeSchema), controller.invite);
+
 
   /**
    * @openapi

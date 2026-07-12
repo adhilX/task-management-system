@@ -4,6 +4,7 @@ import { ITokenService } from '../../application/services/token-service.interfac
 export class JwtService implements ITokenService {
   constructor(
     private readonly secret: string,
+    private readonly refreshSecret: string,
     private readonly expiresIn: string
   ) {}
 
@@ -13,7 +14,17 @@ export class JwtService implements ITokenService {
     });
   }
 
+  signRefresh(payload: any, options?: { expiresIn?: string }): string {
+    return jwt.sign(payload, this.refreshSecret, {
+      expiresIn: (options?.expiresIn || '7d') as any,
+    });
+  }
+
   verify(token: string): any {
     return jwt.verify(token, this.secret);
+  }
+
+  verifyRefresh(token: string): any {
+    return jwt.verify(token, this.refreshSecret);
   }
 }

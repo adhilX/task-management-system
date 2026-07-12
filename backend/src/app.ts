@@ -1,5 +1,8 @@
 import express, { Express } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+import { rateLimit } from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './presentation/swagger';
 import { createAuthRouter } from './presentation/routes/auth.routes';
@@ -14,26 +17,41 @@ import { MongooseProjectRepository } from './infrastructure/database/mongoose/re
 import { MongooseTaskRepository } from './infrastructure/database/mongoose/repositories/mongoose-task.repository';
 import { BcryptService } from './infrastructure/security/bcrypt.service';
 import { JwtService } from './infrastructure/security/jwt.service';
+import { EmailService } from './infrastructure/email/email.service';
 
 export function createApp(config: {
   jwtSecret: string;
+  jwtRefreshSecret: string;
   jwtExpiresIn: string;
+  bcryptSaltRounds: number;
+  corsOrigin: string;
 }): Express {
   const app = express();
 
   // Middleware
+  app.use(helmet());
+  app.use(cookieParser());
   app.use(
     cors({
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      origin: config.corsOrigin,
       credentials: true,
     })
   );
+  
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+  });
+  app.use('/api', apiLimiter);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
   // Instances (Dependency Injection)
-  const bcryptService = new BcryptService();
-  const jwtService = new JwtService(config.jwtSecret, config.jwtExpiresIn);
+  const bcryptService = new BcryptService(config.bcryptSaltRounds);
+  const jwtService = new JwtService(config.jwtSecret, config.jwtRefreshSecret, config.jwtExpiresIn);
+  const emailService = new EmailService();
 
   const userRepository = new MongooseUserRepository();
   const projectRepository = new MongooseProjectRepository();
@@ -51,7 +69,7 @@ export function createApp(config: {
 
   // Routers
   app.use('/api/auth', createAuthRouter(userRepository, bcryptService, jwtService, authMiddleware));
-  app.use('/api/users', createUserRouter(userRepository, bcryptService, authMiddleware));
+  app.use('/api/users', createUserRouter(userRepository, bcryptService, emailService, authMiddleware));
   app.use('/api/projects', createProjectRouter(projectRepository, authMiddleware));
   app.use('/api/tasks', createTaskRouter(taskRepository, projectRepository, userRepository, authMiddleware));
   app.use('/api/dashboard', createDashboardRouter(userRepository, projectRepository, taskRepository, authMiddleware));

@@ -6,7 +6,7 @@ const UserSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
-    password: { type: String, required: true, select: false },
+    password: { type: String, required: false, select: false },
     role: {
       type: String,
       enum: Object.values(UserRole),
@@ -17,9 +17,12 @@ const UserSchema = new Schema(
       type: String,
       enum: Object.values(UserStatus),
       default: UserStatus.ACTIVE,
+      index: true,
     },
     department: { type: String, trim: true, default: '' },
     refreshToken: { type: String, select: false },
+    invitationToken: { type: String, select: false },
+    invitationExpiresAt: { type: Date },
   },
   {
     timestamps: true,
