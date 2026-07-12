@@ -1,7 +1,8 @@
 import nodemailer from 'nodemailer';
 import { getInvitationTemplate } from './invitation-template';
+import { IEmailService } from '../../application/services/email-service.interface';
 
-export class EmailService {
+export class EmailService implements IEmailService {
   private transporter: nodemailer.Transporter | null = null;
 
   constructor() {
@@ -27,14 +28,9 @@ export class EmailService {
     const inviteLink = `${process.env.CORS_ORIGIN || 'http://localhost:3000'}/invite/${token}`;
     const { subject, text, html } = getInvitationTemplate(name, inviteLink);
 
-    console.log('====================================');
-    console.log(`Sending Invitation to: ${email}`);
-    console.log(`Invite Link: ${inviteLink}`);
-    console.log('====================================');
-
     if (this.transporter) {
       await this.transporter.sendMail({
-        from: process.env.SMTP_FROM || '"TaskFlow" <no-reply@taskflow.com>',
+        from: process.env.SMTP_FROM,
         to: email,
         subject,
         text,

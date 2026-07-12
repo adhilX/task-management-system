@@ -4,12 +4,12 @@ import { User } from '../../../domain/entities/user.entity';
 import { UserRole } from '../../../domain/enums/user-role.enum';
 import { UserStatus } from '../../../domain/enums/user-status.enum';
 import { ConflictException } from '../../../domain/errors/domain.exception';
-import { EmailService } from '../../../infrastructure/email/email.service';
+import { IEmailService } from '../../services/email-service.interface';
 
 export class InviteEmployeeUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly emailService: EmailService
+    private readonly emailService: IEmailService
   ) {}
 
   async execute(dto: { name: string; email: string; department?: string }): Promise<User> {

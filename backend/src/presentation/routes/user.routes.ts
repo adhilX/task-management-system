@@ -8,7 +8,7 @@ import { UpdateUserUseCase } from '../../application/use-cases/users/update-user
 import { InviteEmployeeUseCase } from '../../application/use-cases/users/invite-employee.use-case';
 import { MongooseUserRepository } from '../../infrastructure/database/mongoose/repositories/mongoose-user.repository';
 import { BcryptService } from '../../infrastructure/security/bcrypt.service';
-import { EmailService } from '../../infrastructure/email/email.service';
+import { IEmailService } from '../../application/services/email-service.interface';
 import { UserRole } from '../../domain/enums/user-role.enum';
 import { rolesMiddleware } from '../middlewares/roles.middleware';
 import { validateBody, validateQuery } from '../middlewares/validation.middleware';
@@ -17,7 +17,7 @@ import { createUserSchema, updateUserSchema, findAllUsersQuerySchema, inviteEmpl
 export const createUserRouter = (
   userRepository: MongooseUserRepository,
   bcryptService: BcryptService,
-  emailService: EmailService,
+  emailService: IEmailService,
   authMiddleware: any
 ): Router => {
   const router = Router();
