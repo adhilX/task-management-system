@@ -27,11 +27,8 @@ export class MongooseUserRepository implements IUserRepository {
     return userObj as User;
   }
 
-  async findById(id: string, selectRefreshToken = false, selectPassword = false): Promise<User | null> {
+  async findById(id: string, selectPassword = false): Promise<User | null> {
     const query = UserModel.findById(id);
-    if (selectRefreshToken) {
-      query.select('+refreshToken');
-    }
     if (selectPassword) {
       query.select('+password');
     }
@@ -39,9 +36,6 @@ export class MongooseUserRepository implements IUserRepository {
     if (!doc) return null;
 
     const userObj = doc.toJSON();
-    if (selectRefreshToken && doc.refreshToken) {
-      userObj.refreshToken = doc.refreshToken;
-    }
     if (selectPassword && doc.password) {
       userObj.password = doc.password;
     }

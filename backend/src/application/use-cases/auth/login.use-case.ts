@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import { IUserRepository } from '../../../domain/repositories/user-repository.interface';
 import { UnauthorizedException, ForbiddenException } from '../../../domain/errors/domain.exception';
 import { UserStatus } from '../../../domain/enums/user-status.enum';
@@ -39,9 +38,6 @@ export class LoginUseCase {
     const payload = { sub: user.id, email: user.email, role: user.role, roleType: user.role };
     const accessToken = this.tokenService.sign(payload);
     const refreshToken = this.tokenService.signRefresh(payload);
-
-    const hashedRefreshToken = crypto.createHash('sha256').update(refreshToken).digest('hex');
-    await this.userRepository.update(user.id!, { refreshToken: hashedRefreshToken });
 
     return {
       user: {

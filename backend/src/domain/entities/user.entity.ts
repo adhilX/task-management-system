@@ -9,7 +9,6 @@ export interface User {
   role: UserRole;
   status: UserStatus;
   department?: string;
-  refreshToken?: string;
   invitationToken?: string;
   invitationExpiresAt?: Date;
   createdAt?: Date;

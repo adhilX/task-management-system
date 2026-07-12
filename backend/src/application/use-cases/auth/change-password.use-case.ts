@@ -18,7 +18,7 @@ export class ChangePasswordUseCase {
     }
 
     // 1. Fetch user including password
-    const user = await this.userRepository.findById(userId, false, true);
+    const user = await this.userRepository.findById(userId, true);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -36,10 +36,9 @@ export class ChangePasswordUseCase {
     // 3. Hash new password
     const hashedNewPassword = await this.passwordHasher.hash(newPassword);
 
-    // 4. Update password and invalidate refresh token
+    // 4. Update password
     await this.userRepository.update(userId, {
       password: hashedNewPassword,
-      refreshToken: '', // Invalidate active refresh tokens
     });
   }
 }

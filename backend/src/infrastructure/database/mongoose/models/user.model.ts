@@ -20,7 +20,6 @@ const UserSchema = new Schema(
       index: true,
     },
     department: { type: String, trim: true, default: '' },
-    refreshToken: { type: String, select: false },
     invitationToken: { type: String, select: false },
     invitationExpiresAt: { type: Date },
   },
