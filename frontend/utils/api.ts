@@ -28,7 +28,7 @@ export async function apiFetch<T = any>(endpoint: string, options: FetchOptions 
   // Determine token to attach
   // If endpoint is admin-related or store is admin, we attach admin token, otherwise user token.
   let token: string | null = null;
-  const isAdminRoute = endpoint.includes("/admin") || window.location.pathname.startsWith("/dashboard");
+  const isAdminRoute = endpoint.includes("/admin") || window.location.pathname.startsWith("/admin");
   
   if (isAdminRoute) {
     token = useAdminAuthStore.getState().accessToken;
