@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { apiFetch } from "../../../utils/api";
+import { apiFetch } from "../../../../utils/api";
 
 const inviteSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),

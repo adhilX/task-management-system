@@ -22,7 +22,7 @@ export default function EmployeeLoginPage() {
 
   React.useEffect(() => {
     if (hasHydrated && isAuthenticated) {
-      router.push("/employee/dashboard");
+      router.push("/dashboard");
     }
   }, [hasHydrated, isAuthenticated, router]);
 
@@ -45,7 +45,7 @@ export default function EmployeeLoginPage() {
       setAuth(data.accessToken, data.user);
 
       // Route to employee dashboard upon success
-      router.push("/employee/dashboard");
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Invalid employee credentials. Please try again.");
       setLoading(false);

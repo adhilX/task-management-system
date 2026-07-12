@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
 
   React.useEffect(() => {
     if (hasHydrated && isAuthenticated) {
-      router.push("/dashboard");
+      router.push("/admin/dashboard");
     }
   }, [hasHydrated, isAuthenticated, router]);
 
@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
       setAuth(data.accessToken, data.user);
 
       // Route to admin dashboard upon success
-      router.push("/dashboard");
+      router.push("/admin/dashboard");
     } catch (err: any) {
       setError(err.message || "Invalid administrator credentials. Please try again.");
       setLoading(false);

@@ -5,8 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { apiFetch } from "../../../utils/api";
-import { useUserAuthStore } from "../../../stores/userAuthStore";
+import { apiFetch } from "../../../../utils/api";
+import { useAdminAuthStore } from "../../../../stores/adminAuthStore";
 import { useRouter } from "next/navigation";
 
 const profileSchema = z.object({
@@ -25,10 +25,10 @@ const passwordSchema = z.object({
 type ProfileInputs = z.infer<typeof profileSchema>;
 type PasswordInputs = z.infer<typeof passwordSchema>;
 
-export default function EmployeeProfilePage() {
+export default function AdminProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { userInfo, setAuth, logout } = useUserAuthStore();
+  const { adminInfo, setAuth, logout } = useAdminAuthStore();
 
   const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
@@ -37,12 +37,12 @@ export default function EmployeeProfilePage() {
 
   const profileForm = useForm<ProfileInputs>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: userInfo?.name || "" },
+    defaultValues: { name: adminInfo?.name || "" },
   });
 
-  // 1. Fetch profile
-  const { data: profile } = useQuery({
-    queryKey: ["currentEmployeeProfile"],
+  // 1. Fetch current profile
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["currentAdminProfile"],
     queryFn: () => apiFetch("/auth/me"),
   });
 
@@ -60,20 +60,20 @@ export default function EmployeeProfilePage() {
   // 2. Update Profile Mutation
   const updateProfileMutation = useMutation({
     mutationFn: (inputs: ProfileInputs) =>
-      apiFetch(`/users/${userInfo?.id}`, {
+      apiFetch(`/users/${adminInfo?.id}`, {
         method: "PATCH",
         body: JSON.stringify(inputs),
       }),
     onSuccess: (updatedUser) => {
-      queryClient.invalidateQueries({ queryKey: ["currentEmployeeProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["currentAdminProfile"] });
       // Update store
-      if (userInfo) {
-        setAuth(useUserAuthStore.getState().accessToken || "", {
-          ...userInfo,
+      if (adminInfo) {
+        setAuth(useAdminAuthStore.getState().accessToken || "", {
+          ...adminInfo,
           name: updatedUser.name,
         });
       }
-      setProfileSuccess("Display name updated successfully.");
+      setProfileSuccess("Profile name updated successfully.");
       setTimeout(() => setProfileSuccess(""), 4000);
     },
     onError: (err: any) => {
@@ -96,10 +96,10 @@ export default function EmployeeProfilePage() {
       setPasswordSuccess("Password changed successfully! Logging out...");
       passwordForm.reset();
       
-      // Logout and redirect to login
+      // Logout after delay
       setTimeout(() => {
         logout();
-        router.push("/login?relogin=true");
+        router.push("/admin/login?relogin=true");
       }, 2000);
     },
     onError: (err: any) => {
@@ -113,8 +113,8 @@ export default function EmployeeProfilePage() {
       {/* Profile Detail Cards */}
       <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-md space-y-6">
         <div>
-          <h3 className="font-bold text-white tracking-tight text-lg">Employee Profile Details</h3>
-          <p className="text-xs text-slate-400 mt-1">View and update your display name.</p>
+          <h3 className="font-bold text-white tracking-tight text-lg">Admin Profile Details</h3>
+          <p className="text-xs text-slate-400 mt-1">View and edit your personal system credentials.</p>
         </div>
 
         {profileSuccess && (
@@ -136,7 +136,7 @@ export default function EmployeeProfilePage() {
             <input
               type="text"
               disabled
-              value={userInfo?.email || ""}
+              value={adminInfo?.email || ""}
               className="w-full px-4 py-2.5 bg-slate-950/60 border border-slate-900 rounded-xl text-xs text-slate-500 cursor-not-allowed"
             />
           </div>
@@ -159,7 +159,7 @@ export default function EmployeeProfilePage() {
           <button
             type="submit"
             disabled={updateProfileMutation.isPending}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
+            className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
           >
             {updateProfileMutation.isPending ? "Saving..." : "Save Display Name"}
           </button>
@@ -233,7 +233,7 @@ export default function EmployeeProfilePage() {
           <button
             type="submit"
             disabled={changePasswordMutation.isPending}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
+            className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
           >
             {changePasswordMutation.isPending ? "Updating Password..." : "Change Security Password"}
           </button>

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { apiFetch } from "../../../utils/api";
-import { useAdminAuthStore } from "../../../stores/adminAuthStore";
+import { useUserAuthStore } from "../../../stores/userAuthStore";
 import { useRouter } from "next/navigation";
 
 const profileSchema = z.object({
@@ -25,10 +25,10 @@ const passwordSchema = z.object({
 type ProfileInputs = z.infer<typeof profileSchema>;
 type PasswordInputs = z.infer<typeof passwordSchema>;
 
-export default function AdminProfilePage() {
+export default function EmployeeProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { adminInfo, setAuth, logout } = useAdminAuthStore();
+  const { userInfo, setAuth, logout } = useUserAuthStore();
 
   const [profileSuccess, setProfileSuccess] = useState("");
   const [profileError, setProfileError] = useState("");
@@ -37,12 +37,12 @@ export default function AdminProfilePage() {
 
   const profileForm = useForm<ProfileInputs>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { name: adminInfo?.name || "" },
+    defaultValues: { name: userInfo?.name || "" },
   });
 
-  // 1. Fetch current profile
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["currentAdminProfile"],
+  // 1. Fetch profile
+  const { data: profile } = useQuery({
+    queryKey: ["currentEmployeeProfile"],
     queryFn: () => apiFetch("/auth/me"),
   });
 
@@ -60,20 +60,20 @@ export default function AdminProfilePage() {
   // 2. Update Profile Mutation
   const updateProfileMutation = useMutation({
     mutationFn: (inputs: ProfileInputs) =>
-      apiFetch(`/users/${adminInfo?.id}`, {
+      apiFetch(`/users/${userInfo?.id}`, {
         method: "PATCH",
         body: JSON.stringify(inputs),
       }),
     onSuccess: (updatedUser) => {
-      queryClient.invalidateQueries({ queryKey: ["currentAdminProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["currentEmployeeProfile"] });
       // Update store
-      if (adminInfo) {
-        setAuth(useAdminAuthStore.getState().accessToken || "", {
-          ...adminInfo,
+      if (userInfo) {
+        setAuth(useUserAuthStore.getState().accessToken || "", {
+          ...userInfo,
           name: updatedUser.name,
         });
       }
-      setProfileSuccess("Profile name updated successfully.");
+      setProfileSuccess("Display name updated successfully.");
       setTimeout(() => setProfileSuccess(""), 4000);
     },
     onError: (err: any) => {
@@ -96,10 +96,10 @@ export default function AdminProfilePage() {
       setPasswordSuccess("Password changed successfully! Logging out...");
       passwordForm.reset();
       
-      // Logout after delay
+      // Logout and redirect to login
       setTimeout(() => {
         logout();
-        router.push("/admin/login?relogin=true");
+        router.push("/login?relogin=true");
       }, 2000);
     },
     onError: (err: any) => {
@@ -113,8 +113,8 @@ export default function AdminProfilePage() {
       {/* Profile Detail Cards */}
       <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-md space-y-6">
         <div>
-          <h3 className="font-bold text-white tracking-tight text-lg">Admin Profile Details</h3>
-          <p className="text-xs text-slate-400 mt-1">View and edit your personal system credentials.</p>
+          <h3 className="font-bold text-white tracking-tight text-lg">Employee Profile Details</h3>
+          <p className="text-xs text-slate-400 mt-1">View and update your display name.</p>
         </div>
 
         {profileSuccess && (
@@ -136,7 +136,7 @@ export default function AdminProfilePage() {
             <input
               type="text"
               disabled
-              value={adminInfo?.email || ""}
+              value={userInfo?.email || ""}
               className="w-full px-4 py-2.5 bg-slate-950/60 border border-slate-900 rounded-xl text-xs text-slate-500 cursor-not-allowed"
             />
           </div>
@@ -159,7 +159,7 @@ export default function AdminProfilePage() {
           <button
             type="submit"
             disabled={updateProfileMutation.isPending}
-            className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
+            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
           >
             {updateProfileMutation.isPending ? "Saving..." : "Save Display Name"}
           </button>
@@ -233,7 +233,7 @@ export default function AdminProfilePage() {
           <button
             type="submit"
             disabled={changePasswordMutation.isPending}
-            className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
+            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
           >
             {changePasswordMutation.isPending ? "Updating Password..." : "Change Security Password"}
           </button>
