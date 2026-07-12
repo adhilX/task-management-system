@@ -159,18 +159,7 @@ export default function EmployeeLoginPage() {
           )}
         </button>
       </form>
-
-      <div className="mt-6 pt-6 border-t border-slate-800/60 text-center">
-        <p className="text-xs text-slate-400">
-          Don't have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-semibold text-indigo-400 hover:text-indigo-300 transition duration-150"
-          >
-            Sign Up
-          </Link>
-        </p>
-      </div>
+      
     </div>
   );
 }
