@@ -159,7 +159,7 @@ export default function AdminProfilePage() {
           <button
             type="submit"
             disabled={updateProfileMutation.isPending}
-            className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
+            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
           >
             {updateProfileMutation.isPending ? "Saving..." : "Save Display Name"}
           </button>
@@ -233,7 +233,7 @@ export default function AdminProfilePage() {
           <button
             type="submit"
             disabled={changePasswordMutation.isPending}
-            className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
+            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
           >
             {changePasswordMutation.isPending ? "Updating Password..." : "Change Security Password"}
           </button>

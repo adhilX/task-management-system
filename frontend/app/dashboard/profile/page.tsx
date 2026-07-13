@@ -8,6 +8,7 @@ import * as z from "zod";
 import { apiFetch } from "../../../utils/api";
 import { useUserAuthStore } from "../../../stores/userAuthStore";
 import { useRouter } from "next/navigation";
+import { User, Shield, Lock, Eye, EyeOff, Mail, Save } from "lucide-react";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -35,6 +36,10 @@ export default function EmployeeProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const profileForm = useForm<ProfileInputs>({
     resolver: zodResolver(profileSchema),
     defaultValues: { name: userInfo?.name || "" },
@@ -56,6 +61,28 @@ export default function EmployeeProfilePage() {
     resolver: zodResolver(passwordSchema),
     defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
   });
+
+  // Calculate Password Strength dynamically
+  const newPasswordVal = passwordForm.watch("newPassword") || "";
+  const hasLength = newPasswordVal.length >= 8;
+  const hasUpper = /[A-Z]/.test(newPasswordVal);
+  const hasNumber = /[0-9]/.test(newPasswordVal);
+  const hasSpecial = /[^A-Za-z0-9]/.test(newPasswordVal);
+
+  const strengthScore = [hasLength, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+
+  const getStrengthText = () => {
+    if (!newPasswordVal) return "";
+    if (strengthScore <= 1) return "Weak";
+    if (strengthScore <= 3) return "Medium";
+    return "Strong";
+  };
+
+  const getStrengthColor = () => {
+    if (strengthScore <= 1) return "text-red-500";
+    if (strengthScore <= 3) return "text-amber-500";
+    return "text-emerald-500";
+  };
 
   // 2. Update Profile Mutation
   const updateProfileMutation = useMutation({
@@ -95,7 +122,7 @@ export default function EmployeeProfilePage() {
     onSuccess: () => {
       setPasswordSuccess("Password changed successfully! Logging out...");
       passwordForm.reset();
-      
+
       // Logout and redirect to login
       setTimeout(() => {
         logout();
@@ -109,135 +136,257 @@ export default function EmployeeProfilePage() {
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Profile Detail Cards */}
-      <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-md space-y-6">
-        <div>
-          <h3 className="font-bold text-white tracking-tight text-lg">Employee Profile Details</h3>
-          <p className="text-xs text-slate-400 mt-1">View and update your display name.</p>
-        </div>
-
-        {profileSuccess && (
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 rounded-xl text-xs text-emerald-400">
-            {profileSuccess}
-          </div>
-        )}
-        {profileError && (
-          <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-xs text-red-400">
-            {profileError}
-          </div>
-        )}
-
-        <form onSubmit={profileForm.handleSubmit((d) => updateProfileMutation.mutate(d))} className="space-y-4">
-          <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
-              Email Address (Read-only)
-            </label>
-            <input
-              type="text"
-              disabled
-              value={userInfo?.email || ""}
-              className="w-full px-4 py-2.5 bg-slate-950/60 border border-slate-900 rounded-xl text-xs text-slate-500 cursor-not-allowed"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
-              Display Name
-            </label>
-            <input
-              type="text"
-              {...profileForm.register("name")}
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-              placeholder="Name"
-            />
-            {profileForm.formState.errors.name && (
-              <p className="text-[10px] text-red-400 mt-1">{profileForm.formState.errors.name.message}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={updateProfileMutation.isPending}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
-          >
-            {updateProfileMutation.isPending ? "Saving..." : "Save Display Name"}
-          </button>
-        </form>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-text-title">Profile Settings</h1>
+        <p className="text-xs text-text-muted mt-1">Manage your personal information and update your password.</p>
       </div>
 
-      {/* Password Change Cards */}
-      <div className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-md space-y-6">
-        <div>
-          <h3 className="font-bold text-white tracking-tight text-lg">Change Password</h3>
-          <p className="text-xs text-slate-400 mt-1">Update your sign-in password. Note: Changing password will log you out.</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Profile Detail Card */}
+        <div className="p-6 rounded-2xl bg-bg-card border border-border-card backdrop-blur-md flex flex-col justify-between">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-4 border-b border-border-card">
+              <div className="w-10 h-10 rounded-full bg-bg-accent border border-border-accent flex items-center justify-center text-brand-primary shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-text-title text-sm">Edit Profile</h3>
+                <p className="text-[11px] text-text-muted mt-0.5">Update your personal information.</p>
+              </div>
+            </div>
+
+            {profileSuccess && (
+              <div className="p-3 bg-[#10b981]/10 border border-[#10b981]/25 rounded-xl text-xs text-[#10b981] font-semibold">
+                {profileSuccess}
+              </div>
+            )}
+            {profileError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-xs text-red-400 font-semibold">
+                {profileError}
+              </div>
+            )}
+
+            <form onSubmit={profileForm.handleSubmit((d) => updateProfileMutation.mutate(d))} className="space-y-4">
+              <div>
+                <label className="block text-[11px] text-text-muted font-bold mb-1.5">
+                  Email Address (Read-only)
+                </label>
+                <div className="relative flex items-center bg-bg-input/40 border border-border-input/60 rounded-xl px-3.5 py-2.5">
+                  <Mail className="w-4 h-4 text-text-muted mr-2.5 shrink-0" />
+                  <input
+                    type="text"
+                    disabled
+                    value={userInfo?.email || ""}
+                    className="w-full bg-transparent text-xs text-text-muted font-semibold focus:outline-none cursor-not-allowed"
+                  />
+                  <span className="bg-bg-accent border border-border-accent text-brand-primary text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
+                    Read only
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-text-muted font-bold mb-1.5">
+                  Display Name
+                </label>
+                <div className="relative flex items-center bg-bg-input border border-border-input focus-within:border-brand-primary rounded-xl px-3.5 py-2.5 transition-colors">
+                  <User className="w-4 h-4 text-text-muted mr-2.5 shrink-0" />
+                  <input
+                    type="text"
+                    {...profileForm.register("name")}
+                    className="w-full bg-transparent text-xs text-text-title focus:outline-none"
+                    placeholder="Display Name"
+                  />
+                </div>
+                {profileForm.formState.errors.name && (
+                  <p className="text-[10px] text-red-400 mt-1.5 font-bold">{profileForm.formState.errors.name.message}</p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={updateProfileMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-primary hover:bg-brand-primary/95 active:scale-[0.98] rounded-xl text-xs font-bold text-brand-btn-text shadow-lg shadow-indigo-500/10 transition duration-150 cursor-pointer"
+              >
+                <Save className="w-4 h-4" />
+                <span>{updateProfileMutation.isPending ? "Saving..." : "Save Changes"}</span>
+              </button>
+            </form>
+          </div>
         </div>
 
-        {passwordSuccess && (
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 rounded-xl text-xs text-emerald-400">
-            {passwordSuccess}
-          </div>
-        )}
-        {passwordError && (
-          <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-xs text-red-400">
-            {passwordError}
-          </div>
-        )}
+        {/* Change Password Card */}
+        <div className="p-6 rounded-2xl bg-bg-card border border-border-card backdrop-blur-md flex flex-col justify-between">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 pb-4 border-b border-border-card">
+              <div className="w-10 h-10 rounded-full bg-bg-accent border border-border-accent flex items-center justify-center text-brand-primary shrink-0">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-text-title text-sm">Change Password</h3>
+                <p className="text-[11px] text-text-muted mt-0.5">Update your password to keep your account secure.</p>
+              </div>
+            </div>
 
-        <form onSubmit={passwordForm.handleSubmit((d) => changePasswordMutation.mutate(d))} className="space-y-4">
-          <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
-              Current Password
-            </label>
-            <input
-              type="password"
-              {...passwordForm.register("currentPassword")}
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-              placeholder="••••••••"
-            />
-            {passwordForm.formState.errors.currentPassword && (
-              <p className="text-[10px] text-red-400 mt-1">{passwordForm.formState.errors.currentPassword.message}</p>
+            {passwordSuccess && (
+              <div className="p-3 bg-[#10b981]/10 border border-[#10b981]/25 rounded-xl text-xs text-[#10b981] font-semibold">
+                {passwordSuccess}
+              </div>
             )}
-          </div>
-
-          <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
-              New Password
-            </label>
-            <input
-              type="password"
-              {...passwordForm.register("newPassword")}
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-              placeholder="••••••••"
-            />
-            {passwordForm.formState.errors.newPassword && (
-              <p className="text-[10px] text-red-400 mt-1">{passwordForm.formState.errors.newPassword.message}</p>
+            {passwordError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-xs text-red-400 font-semibold">
+                {passwordError}
+              </div>
             )}
-          </div>
 
-          <div>
-            <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              {...passwordForm.register("confirmPassword")}
-              className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
-              placeholder="••••••••"
-            />
-            {passwordForm.formState.errors.confirmPassword && (
-              <p className="text-[10px] text-red-400 mt-1">{passwordForm.formState.errors.confirmPassword.message}</p>
-            )}
-          </div>
+            <form onSubmit={passwordForm.handleSubmit((d) => changePasswordMutation.mutate(d))} className="space-y-4">
+              <div>
+                <label className="block text-[11px] text-text-muted font-bold mb-1.5">
+                  Current Password
+                </label>
+                <div className="relative flex items-center bg-bg-input border border-border-input focus-within:border-brand-primary rounded-xl px-3.5 py-2.5 transition-colors">
+                  <Lock className="w-4 h-4 text-text-muted mr-2.5 shrink-0" />
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    {...passwordForm.register("currentPassword")}
+                    className="w-full bg-transparent text-xs text-text-title focus:outline-none pr-8"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3.5 text-text-muted hover:text-text-body focus:outline-none"
+                  >
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {passwordForm.formState.errors.currentPassword && (
+                  <p className="text-[10px] text-red-400 mt-1.5 font-bold">{passwordForm.formState.errors.currentPassword.message}</p>
+                )}
+              </div>
 
-          <button
-            type="submit"
-            disabled={changePasswordMutation.isPending}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
-          >
-            {changePasswordMutation.isPending ? "Updating Password..." : "Change Security Password"}
-          </button>
-        </form>
+              <div>
+                <label className="block text-[11px] text-text-muted font-bold mb-1.5">
+                  New Password
+                </label>
+                <div className="relative flex items-center bg-bg-input border border-border-input focus-within:border-brand-primary rounded-xl px-3.5 py-2.5 transition-colors">
+                  <Lock className="w-4 h-4 text-text-muted mr-2.5 shrink-0" />
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    {...passwordForm.register("newPassword")}
+                    className="w-full bg-transparent text-xs text-text-title focus:outline-none pr-8"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3.5 text-text-muted hover:text-text-body focus:outline-none"
+                  >
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {/* Strength Meter Bar */}
+                <div className="flex items-center justify-between mt-2 w-full gap-2">
+                  <div className="flex gap-1.5 flex-1">
+                    {[...Array(4)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < strengthScore
+                            ? strengthScore <= 1
+                              ? "bg-red-500"
+                              : strengthScore <= 3
+                                ? "bg-amber-500"
+                                : "bg-brand-primary"
+                            : "bg-bg-accent"
+                          }`}
+                      />
+                    ))}
+                  </div>
+                  {newPasswordVal && (
+                    <span className={`text-[10px] font-bold ${getStrengthColor()} shrink-0`}>
+                      {getStrengthText()}
+                    </span>
+                  )}
+                </div>
+
+                {passwordForm.formState.errors.newPassword && (
+                  <p className="text-[10px] text-red-400 mt-1.5 font-bold">{passwordForm.formState.errors.newPassword.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[11px] text-text-muted font-bold mb-1.5">
+                  Confirm New Password
+                </label>
+                <div className="relative flex items-center bg-bg-input border border-border-input focus-within:border-brand-primary rounded-xl px-3.5 py-2.5 transition-colors">
+                  <Lock className="w-4 h-4 text-text-muted mr-2.5 shrink-0" />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...passwordForm.register("confirmPassword")}
+                    className="w-full bg-transparent text-xs text-text-title focus:outline-none pr-8"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3.5 text-text-muted hover:text-text-body focus:outline-none"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {passwordForm.formState.errors.confirmPassword && (
+                  <p className="text-[10px] text-red-400 mt-1.5 font-bold">{passwordForm.formState.errors.confirmPassword.message}</p>
+                )}
+              </div>
+
+              {/* Password Requirements Checklist */}
+              <div className="space-y-2 pt-2">
+                <span className="text-[11px] text-text-muted font-bold block">Password requirements:</span>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  <div className="flex items-center gap-2 text-[10px] font-bold">
+                    <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${hasLength ? "bg-[#10b981]/10 text-[#10b981]" : "bg-bg-accent text-text-muted"
+                      }`}>
+                      ✓
+                    </span>
+                    <span className={hasLength ? "text-[#10b981]" : "text-text-muted"}>At least 8 characters</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-bold">
+                    <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${hasNumber ? "bg-[#10b981]/10 text-[#10b981]" : "bg-bg-accent text-text-muted"
+                      }`}>
+                      ✓
+                    </span>
+                    <span className={hasNumber ? "text-[#10b981]" : "text-text-muted"}>One number</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-bold">
+                    <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${hasUpper ? "bg-[#10b981]/10 text-[#10b981]" : "bg-bg-accent text-text-muted"
+                      }`}>
+                      ✓
+                    </span>
+                    <span className={hasUpper ? "text-[#10b981]" : "text-text-muted"}>One uppercase letter</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] font-bold">
+                    <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all ${hasSpecial ? "bg-[#10b981]/10 text-[#10b981]" : "bg-bg-accent text-text-muted"
+                      }`}>
+                      ✓
+                    </span>
+                    <span className={hasSpecial ? "text-[#10b981]" : "text-text-muted"}>One special character</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={changePasswordMutation.isPending}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-primary hover:bg-brand-primary/95 active:scale-[0.98] rounded-xl text-xs font-bold text-brand-btn-text shadow-lg shadow-indigo-500/10 transition duration-150 mt-6 cursor-pointer"
+              >
+                <Lock className="w-4 h-4" />
+                <span>{changePasswordMutation.isPending ? "Updating Password..." : "Update Password"}</span>
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );

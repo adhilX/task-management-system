@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { apiFetch } from "../../../../utils/api";
+import { Plus, Pencil, Trash2, Lock, Unlock } from "lucide-react";
 
 const inviteSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -137,9 +138,9 @@ export default function AdminEmployeesPage() {
         </div>
         <button
           onClick={() => setInviteModalOpen(true)}
-          className="px-4 py-2 text-xs font-semibold rounded-xl bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/20 hover:shadow-purple-600/30 transition self-start"
+          className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition self-start"
         >
-          ➕ Invite Employee
+          <span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> Invite Employee</span>
         </button>
       </div>
 
@@ -162,7 +163,7 @@ export default function AdminEmployeesPage() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by name or email..."
-          className="w-full px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+          className="w-full px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
         />
       </div>
 
@@ -205,9 +206,9 @@ export default function AdminEmployeesPage() {
                   <td className="py-4 px-6 text-right space-x-2">
                     <button
                       onClick={() => openEditModal(emp)}
-                      className="px-2 py-1 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-lg"
+                      className="px-2 py-1 bg-slate-850 hover:bg-slate-800 text-slate-350 hover:text-white rounded-lg inline-flex items-center gap-1"
                     >
-                      ✏️ Edit
+                      <Pencil className="w-2.5 h-2.5" /> Edit
                     </button>
                     <button
                       onClick={() =>
@@ -216,13 +217,21 @@ export default function AdminEmployeesPage() {
                           status: emp.status === "active" ? "inactive" : "active",
                         })
                       }
-                      className={`px-2 py-1 rounded-lg text-white ${
+                      className={`px-2 py-1 rounded-lg text-white inline-flex items-center gap-1 ${
                         emp.status === "active"
                           ? "bg-amber-600 hover:bg-amber-500"
                           : "bg-emerald-600 hover:bg-emerald-500"
                       }`}
                     >
-                      {emp.status === "active" ? "🔒 Suspend" : "🔓 Activate"}
+                      {emp.status === "active" ? (
+                        <>
+                          <Lock className="w-2.5 h-2.5" /> Suspend
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="w-2.5 h-2.5" /> Activate
+                        </>
+                      )}
                     </button>
                     <button
                       onClick={() => {
@@ -230,9 +239,9 @@ export default function AdminEmployeesPage() {
                           deleteMutation.mutate(emp.id);
                         }
                       }}
-                      className="px-2 py-1 bg-red-650 hover:bg-red-550 text-white rounded-lg"
+                      className="px-2 py-1 bg-red-650 hover:bg-red-550 text-white rounded-lg inline-flex items-center gap-1"
                     >
-                      🗑️ Delete
+                      <Trash2 className="w-2.5 h-2.5" /> Delete
                     </button>
                   </td>
                 </tr>
@@ -289,7 +298,7 @@ export default function AdminEmployeesPage() {
               <button
                 type="submit"
                 disabled={inviteMutation.isPending}
-                className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white"
               >
                 {inviteMutation.isPending ? "Sending Invite..." : "Send Secure Invitation Link"}
               </button>
@@ -338,7 +347,7 @@ export default function AdminEmployeesPage() {
               <button
                 type="submit"
                 disabled={editMutation.isPending}
-                className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white"
               >
                 {editMutation.isPending ? "Saving Changes..." : "Save Member Details"}
               </button>

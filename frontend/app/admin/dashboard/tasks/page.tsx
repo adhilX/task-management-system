@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { apiFetch } from "../../../../utils/api";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 const taskSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -54,10 +55,12 @@ export default function AdminTasksPage() {
   });
 
   // 2. Fetch Projects
-  const { data: projects } = useQuery<Project[]>({
+  const { data: projectsData } = useQuery<{ projects: Project[] }>({
     queryKey: ["projects"],
     queryFn: () => apiFetch("/projects"),
   });
+
+  const projects = projectsData?.projects || [];
 
   const form = useForm<TaskInputs>({
     resolver: zodResolver(taskSchema),
@@ -182,9 +185,9 @@ export default function AdminTasksPage() {
             form.reset({ title: "", description: "", status: "todo", priority: "medium", project: "", assignee: "" });
             setTaskModalOpen(true);
           }}
-          className="px-4 py-2 text-xs font-semibold rounded-xl bg-purple-600 hover:bg-purple-500 text-white shadow-lg transition self-start"
+          className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition self-start"
         >
-          ➕ New Task
+          <span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> New Task</span>
         </button>
       </div>
 
@@ -245,7 +248,7 @@ export default function AdminTasksPage() {
                           : task.status === "in-progress"
                           ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
                           : task.status === "review"
-                          ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                           : "bg-slate-500/10 text-slate-400 border-slate-800"
                       }`}>
                         {task.status}
@@ -254,9 +257,9 @@ export default function AdminTasksPage() {
                     <td className="py-4 px-6 text-right space-x-2">
                       <button
                         onClick={() => handleEdit(task)}
-                        className="px-2.5 py-1 text-[11px] bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-lg"
+                        className="px-2.5 py-1 text-[11px] bg-slate-850 hover:bg-slate-800 text-slate-350 hover:text-white rounded-lg inline-flex items-center gap-1"
                       >
-                        ✏️ Edit
+                        <Pencil className="w-2.5 h-2.5" /> Edit
                       </button>
                       <button
                         onClick={() => {
@@ -264,9 +267,9 @@ export default function AdminTasksPage() {
                             deleteMutation.mutate(task.id);
                           }
                         }}
-                        className="px-2.5 py-1 text-[11px] bg-red-650/10 hover:bg-red-650 hover:text-white text-red-400 border border-red-500/15 rounded-lg"
+                        className="px-2.5 py-1 text-[11px] bg-red-650/10 hover:bg-red-650 hover:text-white text-red-400 border border-red-500/15 rounded-lg inline-flex items-center gap-1"
                       >
-                        🗑️ Delete
+                        <Trash2 className="w-2.5 h-2.5" /> Delete
                       </button>
                     </td>
                   </tr>
@@ -422,7 +425,7 @@ export default function AdminTasksPage() {
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white mt-4"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white mt-4"
               >
                 {editingTask ? "Save Task Changes" : "Assign Task"}
               </button>

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { apiFetch } from "../../../../utils/api";
 import { useAdminAuthStore } from "../../../../stores/adminAuthStore";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 const projectSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -42,10 +43,12 @@ export default function AdminProjectsPage() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   // 1. Fetch Projects
-  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
+  const { data: projectsData, isLoading: projectsLoading } = useQuery<{ projects: Project[] }>({
     queryKey: ["projects"],
     queryFn: () => apiFetch("/projects"),
   });
+
+  const projects = projectsData?.projects || [];
 
   // 2. Fetch Employees (for Team selection)
   const { data: employeesData } = useQuery<{ users: Member[] }>({
@@ -145,9 +148,9 @@ export default function AdminProjectsPage() {
             form.reset({ name: "", description: "", status: "planning", team: [] });
             setProjectModalOpen(true);
           }}
-          className="px-4 py-2 text-xs font-semibold rounded-xl bg-purple-600 hover:bg-purple-500 text-white shadow-lg transition self-start"
+          className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition self-start"
         >
-          ➕ New Project
+          <span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> New Project</span>
         </button>
       </div>
 
@@ -175,7 +178,7 @@ export default function AdminProjectsPage() {
                     <h3 className="font-bold text-white tracking-tight text-base">{proj.name}</h3>
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
                       proj.status === "active"
-                        ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                         : proj.status === "completed"
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                         : "bg-slate-500/10 text-slate-400 border-slate-800"
@@ -203,9 +206,9 @@ export default function AdminProjectsPage() {
                 <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-slate-800/40">
                   <button
                     onClick={() => handleEdit(proj)}
-                    className="px-2.5 py-1 text-[11px] bg-slate-850 hover:bg-slate-800 text-slate-300 rounded-lg"
+                    className="px-2.5 py-1 text-[11px] bg-slate-850 hover:bg-slate-800 text-slate-350 hover:text-white rounded-lg flex items-center gap-1"
                   >
-                    ✏️ Edit
+                    <Pencil className="w-2.5 h-2.5" /> Edit
                   </button>
                   <button
                     onClick={() => {
@@ -213,9 +216,9 @@ export default function AdminProjectsPage() {
                         deleteMutation.mutate(proj.id);
                       }
                     }}
-                    className="px-2.5 py-1 text-[11px] bg-red-650/10 hover:bg-red-650 hover:text-white text-red-400 border border-red-500/15 rounded-lg"
+                    className="px-2.5 py-1 text-[11px] bg-red-650/10 hover:bg-red-650 hover:text-white text-red-400 border border-red-500/15 rounded-lg flex items-center gap-1"
                   >
-                    🗑️ Delete
+                    <Trash2 className="w-2.5 h-2.5" /> Delete
                   </button>
                 </div>
               </div>
@@ -335,7 +338,7 @@ export default function AdminProjectsPage() {
                           type="checkbox"
                           checked={form.watch("team")?.includes(emp.id)}
                           onChange={(e) => handleCheckboxChange(emp.id, e.target.checked)}
-                          className="rounded border-slate-800 bg-slate-900 text-purple-600 focus:ring-0"
+                          className="rounded border-slate-800 bg-slate-900 text-emerald-600 focus:ring-0"
                         />
                         {emp.name}
                       </label>
@@ -347,7 +350,7 @@ export default function AdminProjectsPage() {
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="w-full py-2.5 bg-purple-600 hover:bg-purple-500 rounded-xl text-xs font-semibold text-white mt-4"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white mt-4"
               >
                 {editingProject ? "Save Project Changes" : "Create Project Workflow"}
               </button>

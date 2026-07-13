@@ -3,6 +3,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../../../utils/api";
+import { Users, Folder, ClipboardList, CheckCircle2, FileText } from "lucide-react";
 
 interface StatsData {
   totalEmployees: number;
@@ -44,7 +45,7 @@ export default function AdminDashboardPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <svg className="animate-spin h-8 w-8 text-purple-500" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
@@ -62,10 +63,10 @@ export default function AdminDashboardPage() {
   }
 
   const statCards = [
-    { name: "Total Employees", value: stats.totalEmployees, icon: "👥", description: "Active team members" },
-    { name: "Total Projects", value: stats.totalProjects, icon: "📁", description: "Active & planned projects" },
-    { name: "Total Tasks", value: stats.totalTasks, icon: "📋", description: "Sprint tasks created" },
-    { name: "Completed Tasks", value: stats.taskCompletion.completed, icon: "✅", description: `${Math.round((stats.taskCompletion.completed / (stats.totalTasks || 1)) * 100)}% completion rate` },
+    { name: "Total Employees", value: stats.totalEmployees, icon: <Users className="w-5 h-5 text-emerald-400" />, description: "Active team members" },
+    { name: "Total Projects", value: stats.totalProjects, icon: <Folder className="w-5 h-5 text-emerald-400" />, description: "Active & planned projects" },
+    { name: "Total Tasks", value: stats.totalTasks, icon: <ClipboardList className="w-5 h-5 text-emerald-400" />, description: "Sprint tasks created" },
+    { name: "Completed Tasks", value: stats.taskCompletion.completed, icon: <CheckCircle2 className="w-5 h-5 text-emerald-400" />, description: `${Math.round((stats.taskCompletion.completed / (stats.totalTasks || 1)) * 100)}% completion rate` },
   ];
 
   return (
@@ -82,7 +83,7 @@ export default function AdminDashboardPage() {
           <div key={card.name} className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-slate-700/80 transition duration-150">
             <div className="flex justify-between items-start text-slate-400">
               <span className="text-xs font-semibold uppercase tracking-wider">{card.name}</span>
-              <span className="text-xl">{card.icon}</span>
+              <div>{card.icon}</div>
             </div>
             <p className="text-3xl font-extrabold text-white tracking-tight mt-4">{card.value}</p>
             <p className="text-[11px] text-slate-500 mt-1">{card.description}</p>
@@ -97,7 +98,7 @@ export default function AdminDashboardPage() {
           <h3 className="font-bold text-white tracking-tight mb-4">Project States</h3>
           <div className="space-y-3">
             {[
-              { label: "Active Projects", value: stats.projectProgress.active, color: "bg-indigo-500" },
+              { label: "Active Projects", value: stats.projectProgress.active, color: "bg-emerald-500" },
               { label: "Planning Stage", value: stats.projectProgress.planning, color: "bg-yellow-500" },
               { label: "Completed Projects", value: stats.projectProgress.completed, color: "bg-emerald-500" },
               { label: "On Hold", value: stats.projectProgress.onHold, color: "bg-rose-500" },
@@ -157,8 +158,8 @@ export default function AdminDashboardPage() {
             ) : (
               stats.recentActivities.map((act) => (
                 <div key={act.id} className="flex gap-3 text-xs leading-relaxed">
-                  <div className="h-6 w-6 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center text-sm">
-                    📝
+                  <div className="h-6 w-6 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center">
+                    <FileText className="w-3.5 h-3.5 text-emerald-400" />
                   </div>
                   <div>
                     <p className="text-slate-300">

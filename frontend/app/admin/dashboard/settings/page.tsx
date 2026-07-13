@@ -17,7 +17,7 @@ export default function AdminSettingsPage() {
             <h4 className="text-xs font-semibold text-white">Public Registrations</h4>
             <p className="text-[10px] text-slate-500 mt-0.5">Disables registrations after the first admin setup.</p>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-wider">
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
             🔒 LOCKED
           </span>
         </div>
