@@ -12,7 +12,7 @@ import { IEmailService } from '../../application/services/email-service.interfac
 import { UserRole } from '../../domain/enums/user-role.enum';
 import { rolesMiddleware } from '../middlewares/roles.middleware';
 import { validateBody, validateQuery } from '../middlewares/validation.middleware';
-import { createUserSchema, updateUserSchema, findAllUsersQuerySchema, inviteEmployeeSchema } from '../validation/user.validation';
+import { createUserSchema, updateUserSchema, updateUserStatusSchema, findAllUsersQuerySchema, inviteEmployeeSchema } from '../validation/user.validation';
 
 export const createUserRouter = (
   userRepository: MongooseUserRepository,
@@ -191,6 +191,7 @@ export const createUserRouter = (
    */
   router.get('/:id', controller.findOne);
   router.patch('/:id', validateBody(updateUserSchema), controller.update);
+  router.patch('/:id/status', validateBody(updateUserStatusSchema), controller.updateStatus);
   router.delete('/:id', controller.delete);
 
   return router;

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "../../../utils/api";
+import { projectService } from "../../../services/project.service";
 import { Folder } from "lucide-react";
 
 interface Member {
@@ -25,7 +25,7 @@ export default function EmployeeProjectsPage() {
   // Fetch assigned projects only (handled securely by backend based on JWT)
   const { data, isLoading } = useQuery<{ projects: Project[] }>({
     queryKey: ["employeeProjects"],
-    queryFn: () => apiFetch("/projects"),
+    queryFn: () => projectService.getProjects(),
   });
 
   if (isLoading) {
@@ -73,12 +73,13 @@ export default function EmployeeProjectsPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-start gap-4">
                     <h3 className="font-bold text-text-title tracking-tight text-sm group-hover:text-brand-primary transition-colors">{proj.name}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold border capitalize shrink-0 ${proj.status === "active"
+                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold border capitalize shrink-0 ${
+                      proj.status?.toLowerCase() === "active"
                         ? "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
-                        : proj.status === "completed"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : "bg-bg-accent text-text-muted border-border-card"
-                      }`}>
+                        : proj.status?.toLowerCase() === "completed"
+                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        : "bg-bg-accent text-text-muted border-border-card"
+                    }`}>
                       {proj.status}
                     </span>
                   </div>

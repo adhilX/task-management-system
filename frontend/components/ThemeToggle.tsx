@@ -1,17 +1,25 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
-export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+interface ThemeToggleProps {
+  variant?: "admin" | "employee";
+}
+
+export default function ThemeToggle({ variant }: ThemeToggleProps) {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname() || "";
+
+  // Auto-detect admin portal usage from path or props
+  const isAdmin = variant === "admin" || (variant === undefined && pathname.includes("/admin"));
 
   useEffect(() => {
     // Determine initial theme on client mount
     const savedTheme = localStorage.getItem("theme") as "light" | "dark";
-    const systemPrefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
     
-    const initialTheme = savedTheme || (systemPrefersLight ? "light" : "dark");
+    const initialTheme = savedTheme || "light";
     setTheme(initialTheme);
     
     if (initialTheme === "light") {
@@ -67,11 +75,18 @@ export default function ThemeToggle() {
       ripple.style.pointerEvents = "none";
       ripple.style.zIndex = "999999";
       
-      // Dynamic drop shadow colors based on the theme being switched to
-      ripple.style.boxShadow =
-        nextTheme === "light"
-          ? "0 0 50px 25px rgba(99, 102, 241, 0.5), 0 0 100px 50px rgba(168, 85, 247, 0.25)"
-          : "0 0 50px 25px rgba(168, 85, 247, 0.5), 0 0 100px 50px rgba(99, 102, 241, 0.25)";
+      // Dynamic drop shadow colors based on the theme variant
+      if (isAdmin) {
+        ripple.style.boxShadow =
+          nextTheme === "light"
+            ? "0 0 50px 25px rgba(16, 185, 129, 0.5), 0 0 100px 50px rgba(20, 184, 166, 0.25)"
+            : "0 0 50px 25px rgba(20, 184, 166, 0.5), 0 0 100px 50px rgba(16, 185, 129, 0.25)";
+      } else {
+        ripple.style.boxShadow =
+          nextTheme === "light"
+            ? "0 0 50px 25px rgba(99, 102, 241, 0.5), 0 0 100px 50px rgba(168, 85, 247, 0.25)"
+            : "0 0 50px 25px rgba(168, 85, 247, 0.5), 0 0 100px 50px rgba(99, 102, 241, 0.25)";
+      }
       ripple.style.border = "1px solid rgba(255, 255, 255, 0.2)";
       
       document.body.appendChild(ripple);
@@ -116,7 +131,11 @@ export default function ThemeToggle() {
       {/* Moon Icon (Dark Mode Indicator) */}
       <svg
         className={`w-4 h-4 transition-colors duration-300 ${
-          theme === "dark" ? "text-indigo-400" : "text-slate-500"
+          theme === "dark"
+            ? isAdmin
+              ? "text-emerald-400"
+              : "text-indigo-400"
+            : "text-slate-500"
         }`}
         fill="currentColor"
         viewBox="0 0 24 24"
@@ -135,9 +154,15 @@ export default function ThemeToggle() {
           aria-label="Toggle Theme"
         />
         {/* Switch track */}
-        <div className="w-11 h-6 bg-slate-950 border border-slate-850 rounded-full transition-all duration-300 peer-focus:outline-none peer-checked:bg-indigo-600 peer-checked:border-indigo-500"></div>
+        <div
+          className={`w-11 h-6 bg-slate-950 border border-slate-850 rounded-full transition-all duration-300 peer-focus:outline-none ${
+            isAdmin
+              ? "peer-checked:bg-emerald-600 peer-checked:border-emerald-500"
+              : "peer-checked:bg-indigo-600 peer-checked:border-indigo-500"
+          }`}
+        ></div>
         {/* Switch knob */}
-        <div className="absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-slate-400 border border-slate-700 rounded-full transition-all duration-300 peer-checked:translate-x-[20px] peer-checked:bg-white peer-checked:border-white"></div>
+        <div className="absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-slate-400 border border-slate-700 rounded-full transition-all duration-300 peer-checked:translate-x-[20px] peer-checked:bg-pure-white peer-checked:border-pure-white"></div>
       </label>
 
       {/* Sun Icon (Light Mode Indicator) */}

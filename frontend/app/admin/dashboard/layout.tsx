@@ -53,7 +53,6 @@ export default function AdminDashboardLayout({
     { name: "Employees", path: "/admin/dashboard/employees", icon: <Users className="w-4 h-4" /> },
     { name: "Projects", path: "/admin/dashboard/projects", icon: <Folder className="w-4 h-4" /> },
     { name: "Tasks", path: "/admin/dashboard/tasks", icon: <ClipboardList className="w-4 h-4" /> },
-    { name: "Profile", path: "/admin/dashboard/profile", icon: <User className="w-4 h-4" /> },
     { name: "Settings", path: "/admin/dashboard/settings", icon: <Settings className="w-4 h-4" /> },
   ];
 

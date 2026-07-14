@@ -13,11 +13,11 @@ export const createUserSchema = Joi.object({
 
 export const updateUserSchema = Joi.object({
   name: Joi.string().optional(),
-  email: Joi.string().email().optional(),
-  password: Joi.string().min(6).optional(),
-  role: Joi.string().valid(...Object.values(UserRole)).optional(),
-  status: Joi.string().valid(...Object.values(UserStatus)).optional(),
   department: Joi.string().allow('').optional(),
+});
+
+export const updateUserStatusSchema = Joi.object({
+  status: Joi.string().valid(...Object.values(UserStatus)).required(),
 });
 
 export const findAllUsersQuerySchema = Joi.object({

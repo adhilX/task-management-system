@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "../utils/api";
+import { authService } from "../services/auth.service";
 
 export default function Home() {
   const router = useRouter();
@@ -10,7 +10,7 @@ export default function Home() {
   useEffect(() => {
     async function checkStatus() {
       try {
-        const data = await apiFetch("/auth/register-status");
+        const data = await authService.getRegistrationStatus();
         if (!data.isLocked) {
           router.push("/register");
         } else {

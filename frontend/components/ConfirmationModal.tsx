@@ -53,9 +53,9 @@ export default function ConfirmationModal({
   const getConfirmButtonStyles = () => {
     switch (variant) {
       case "danger":
-        return "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/10";
+        return "bg-red-600 hover:bg-red-500 text-pure-white shadow-lg shadow-red-500/10";
       case "warning":
-        return "bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-500/10";
+        return "bg-amber-600 hover:bg-amber-500 text-pure-white shadow-lg shadow-amber-500/10";
       case "info":
       default:
         return "bg-brand-primary hover:bg-brand-primary/90 text-brand-btn-text shadow-lg shadow-indigo-500/10";

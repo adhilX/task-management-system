@@ -18,7 +18,7 @@ export class MongooseUserRepository implements IUserRepository {
     }
     const doc = await query.exec();
     if (!doc) return null;
-    
+
     // Convert to JSON and manually include the password if it was selected
     const userObj = doc.toJSON();
     if (selectPassword && doc.password) {

@@ -78,15 +78,7 @@ export class GetEmployeeStatsUseCase {
         medium: mediumPriorityCount,
         high: highPriorityCount,
       },
-      upcomingDeadlines: upcomingDeadlines.map((task) => ({
-        id: task.id,
-        title: task.title,
-        dueDate: task.dueDate,
-        priority: task.priority,
-        projectName: typeof task.project === 'object' && task.project !== null
-          ? (task.project as any).name
-          : 'N/A',
-      })),
+      upcomingDeadlines,
     };
   }
 }

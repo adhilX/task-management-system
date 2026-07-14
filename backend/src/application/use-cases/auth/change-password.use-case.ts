@@ -30,7 +30,7 @@ export class ChangePasswordUseCase {
     // 2. Verify current password
     const isPasswordValid = await this.passwordHasher.compare(currentPassword, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid current password');
+      throw new BadRequestException('Invalid current password');
     }
 
     // 3. Hash new password

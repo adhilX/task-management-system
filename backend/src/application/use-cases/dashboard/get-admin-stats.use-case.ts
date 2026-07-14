@@ -44,20 +44,6 @@ export class GetAdminStatsUseCase {
       limit: 5,
     });
 
-    const recentActivities = recentTasksResult.tasks.map((task) => ({
-      id: task.id,
-      title: task.title,
-      type: 'task',
-      status: task.status,
-      updatedAt: task.updatedAt,
-      assigneeName: typeof task.assignee === 'object' && task.assignee !== null
-        ? (task.assignee as any).name
-        : 'Unassigned',
-      projectName: typeof task.project === 'object' && task.project !== null
-        ? (task.project as any).name
-        : 'N/A',
-    }));
-
     return {
       totalEmployees,
       totalProjects,
@@ -78,7 +64,7 @@ export class GetAdminStatsUseCase {
         completed: completedProjects,
         onHold: onHoldProjects,
       },
-      recentActivities,
+      recentTasks: recentTasksResult.tasks,
     };
   }
 }

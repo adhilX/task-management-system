@@ -6,6 +6,14 @@ import { FindOneUserUseCase } from '../../application/use-cases/users/find-one-u
 import { UpdateUserUseCase } from '../../application/use-cases/users/update-user.use-case';
 import { InviteEmployeeUseCase } from '../../application/use-cases/users/invite-employee.use-case';
 import { sendSuccess } from '../helpers/response.helper';
+import { DtoMapper } from '../dtos/dto.mapper';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    role: string;
+  };
+}
 
 export class UserController {
   constructor(
@@ -15,12 +23,12 @@ export class UserController {
     private readonly findOneUserUseCase: FindOneUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly inviteEmployeeUseCase: InviteEmployeeUseCase
-  ) {}
+  ) { }
 
   invite = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.inviteEmployeeUseCase.execute(req.body);
-      return sendSuccess(res, result, 'Employee invited successfully', 201);
+      return sendSuccess(res, DtoMapper.toUser(result), 'Employee invited successfully', 201);
     } catch (error) {
       next(error);
     }
@@ -29,7 +37,7 @@ export class UserController {
   create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.createUserUseCase.execute(req.body);
-      return sendSuccess(res, result, 'User created successfully', 201);
+      return sendSuccess(res, DtoMapper.toUser(result), 'User created successfully', 201);
     } catch (error) {
       next(error);
     }
@@ -38,7 +46,10 @@ export class UserController {
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.findAllUsersUseCase.execute(req.query);
-      return sendSuccess(res, result, 'Users retrieved successfully');
+      return sendSuccess(res, {
+        users: DtoMapper.toUserList(result.users),
+        total: result.total
+      }, 'Users retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -47,7 +58,7 @@ export class UserController {
   findOne = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.findOneUserUseCase.execute(req.params.id);
-      return sendSuccess(res, result, 'User retrieved successfully');
+      return sendSuccess(res, DtoMapper.toUser(result), 'User retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -56,7 +67,16 @@ export class UserController {
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.updateUserUseCase.execute(req.params.id, req.body);
-      return sendSuccess(res, result, 'User updated successfully');
+      return sendSuccess(res, DtoMapper.toUser(result), 'User updated successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await this.updateUserUseCase.execute(req.params.id, { status: req.body.status });
+      return sendSuccess(res, DtoMapper.toUser(result), 'User status updated successfully');
     } catch (error) {
       next(error);
     }
@@ -65,7 +85,7 @@ export class UserController {
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.deleteUserUseCase.execute(req.params.id);
-      return sendSuccess(res, result, 'User deleted successfully');
+      return sendSuccess(res, DtoMapper.toUser(result), 'User deleted successfully');
     } catch (error) {
       next(error);
     }

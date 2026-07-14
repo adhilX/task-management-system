@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "../../../utils/api";
+import { taskService } from "../../../services/task.service";
 import { ClipboardList } from "lucide-react";
 
 interface Member {
@@ -32,16 +32,13 @@ export default function EmployeeTasksPage() {
   // Fetch tasks assigned to employee (filtered automatically by backend JWT)
   const { data: tasksData, isLoading } = useQuery<{ tasks: Task[] }>({
     queryKey: ["employeeTasks"],
-    queryFn: () => apiFetch("/tasks", { params: { limit: 100 } }),
+    queryFn: () => taskService.getTasks({ limit: 100 }),
   });
 
   // Mutation to update task status
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
-      apiFetch(`/tasks/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      }),
+      taskService.updateTask(id, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employeeTasks"] });
       queryClient.invalidateQueries({ queryKey: ["employeeStats"] });
@@ -124,14 +121,15 @@ export default function EmployeeTasksPage() {
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`inline-flex px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold capitalize ${task.status === "completed"
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold capitalize ${
+                        task.status?.toLowerCase() === "completed"
                           ? "bg-emerald-500/10 text-emerald-400"
-                          : task.status === "in-progress"
-                            ? "bg-blue-500/10 text-blue-400"
-                            : task.status === "review"
-                              ? "bg-purple-500/10 text-purple-400"
-                              : "bg-bg-accent text-text-muted border border-border-accent"
-                        }`}>
+                          : task.status?.toLowerCase() === "in progress" || task.status?.toLowerCase() === "in-progress"
+                          ? "bg-blue-500/10 text-blue-400"
+                          : task.status?.toLowerCase() === "review"
+                          ? "bg-purple-500/10 text-purple-400"
+                          : "bg-bg-accent text-text-muted border border-border-accent"
+                      }`}>
                         {task.status}
                       </span>
                     </td>
@@ -143,10 +141,10 @@ export default function EmployeeTasksPage() {
                           disabled={updateStatusMutation.isPending}
                           className="appearance-none bg-bg-input border border-border-input hover:border-border-accent rounded-xl text-text-title text-xs py-1.5 pl-3 pr-8 focus:outline-none transition-colors cursor-pointer"
                         >
-                          <option value="todo">Todo</option>
-                          <option value="in-progress">In Progress</option>
-                          <option value="review">In Review</option>
-                          <option value="completed">Completed</option>
+                          <option value="To Do">Todo</option>
+                          <option value="In Progress">In Progress</option>
+                          <option value="Review">In Review</option>
+                          <option value="Completed">Completed</option>
                         </select>
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-text-muted text-[8px] font-bold">▼</span>
                       </div>

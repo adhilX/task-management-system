@@ -5,7 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { apiFetch } from "../../../utils/api";
+import { authService } from "../../../services/auth.service";
+import { userService } from "../../../services/user.service";
 import { useUserAuthStore } from "../../../stores/userAuthStore";
 import { useRouter } from "next/navigation";
 import { User, Shield, Lock, Eye, EyeOff, Mail, Save } from "lucide-react";
@@ -48,7 +49,7 @@ export default function EmployeeProfilePage() {
   // 1. Fetch profile
   const { data: profile } = useQuery({
     queryKey: ["currentEmployeeProfile"],
-    queryFn: () => apiFetch("/auth/me"),
+    queryFn: () => authService.getCurrentUser(),
   });
 
   React.useEffect(() => {
@@ -87,10 +88,7 @@ export default function EmployeeProfilePage() {
   // 2. Update Profile Mutation
   const updateProfileMutation = useMutation({
     mutationFn: (inputs: ProfileInputs) =>
-      apiFetch(`/users/${userInfo?.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(inputs),
-      }),
+      userService.updateUser(userInfo?.id || "", inputs),
     onSuccess: (updatedUser) => {
       queryClient.invalidateQueries({ queryKey: ["currentEmployeeProfile"] });
       // Update store
@@ -112,12 +110,9 @@ export default function EmployeeProfilePage() {
   // 3. Change Password Mutation
   const changePasswordMutation = useMutation({
     mutationFn: (inputs: PasswordInputs) =>
-      apiFetch("/auth/change-password", {
-        method: "POST",
-        body: JSON.stringify({
-          currentPassword: inputs.currentPassword,
-          newPassword: inputs.newPassword,
-        }),
+      authService.changePassword({
+        currentPassword: inputs.currentPassword,
+        newPassword: inputs.newPassword,
       }),
     onSuccess: () => {
       setPasswordSuccess("Password changed successfully! Logging out...");

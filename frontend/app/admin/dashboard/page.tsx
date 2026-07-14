@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "../../../utils/api";
+import { dashboardService } from "../../../services/dashboard.service";
 import { Users, Folder, ClipboardList, CheckCircle2, FileText } from "lucide-react";
 
 interface StatsData {
@@ -39,7 +39,7 @@ interface StatsData {
 export default function AdminDashboardPage() {
   const { data: stats, isLoading, error } = useQuery<StatsData>({
     queryKey: ["adminStats"],
-    queryFn: () => apiFetch("/dashboard/stats"),
+    queryFn: () => dashboardService.getStats(),
   });
 
   if (isLoading) {

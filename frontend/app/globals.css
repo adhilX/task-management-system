@@ -13,6 +13,7 @@
   --color-text-muted: var(--text-muted);
   --color-bg-input: var(--bg-input);
   --color-border-input: var(--border-input);
+  --color-pure-white: #ffffff;
 }
 
 :root {

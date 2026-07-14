@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "../../utils/api";
+import { dashboardService } from "../../services/dashboard.service";
 import { useUserAuthStore } from "../../stores/userAuthStore";
 import {
   Folder,
@@ -85,7 +85,7 @@ export default function EmployeeDashboardPage() {
 
   const { data: stats, isLoading, error } = useQuery<EmployeeStats>({
     queryKey: ["employeeStats"],
-    queryFn: () => apiFetch("/dashboard/stats"),
+    queryFn: () => dashboardService.getStats(),
   });
 
   if (isLoading) {

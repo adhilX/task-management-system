@@ -5,7 +5,6 @@ export const createProjectSchema = Joi.object({
   name: Joi.string().required(),
   description: Joi.string().allow('').optional(),
   status: Joi.string().valid(...Object.values(ProjectStatus)).default(ProjectStatus.PLANNING),
-  manager: Joi.string().required(),
   team: Joi.array().items(Joi.string()).default([]),
   startDate: Joi.date().iso().optional(),
   endDate: Joi.date().iso().optional(),

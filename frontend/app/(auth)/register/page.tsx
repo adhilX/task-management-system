@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { apiFetch } from "../../../utils/api";
+import { authService } from "../../../services/auth.service";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -35,7 +35,7 @@ export default function AdminRegisterPage() {
   useEffect(() => {
     async function checkStatus() {
       try {
-        const data = await apiFetch("/auth/register-status");
+        const data = await authService.getRegistrationStatus();
         if (data.isLocked) {
           setIsLocked(true);
         }
@@ -53,10 +53,7 @@ export default function AdminRegisterPage() {
     setLoading(true);
 
     try {
-      await apiFetch("/auth/register", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      await authService.registerAdmin(data);
 
       // Admin created! Redirect to Admin Login
       router.push("/admin/login?setup=success");

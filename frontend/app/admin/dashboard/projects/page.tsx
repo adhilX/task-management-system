@@ -5,9 +5,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { apiFetch } from "../../../../utils/api";
+import { projectService } from "../../../../services/project.service";
+import { userService } from "../../../../services/user.service";
 import { useAdminAuthStore } from "../../../../stores/adminAuthStore";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 const projectSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -41,11 +43,12 @@ export default function AdminProjectsPage() {
   const { adminInfo } = useAdminAuthStore();
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   // 1. Fetch Projects
   const { data: projectsData, isLoading: projectsLoading } = useQuery<{ projects: Project[] }>({
     queryKey: ["projects"],
-    queryFn: () => apiFetch("/projects"),
+    queryFn: () => projectService.getProjects(),
   });
 
   const projects = projectsData?.projects || [];
@@ -53,12 +56,12 @@ export default function AdminProjectsPage() {
   // 2. Fetch Employees (for Team selection)
   const { data: employeesData } = useQuery<{ users: Member[] }>({
     queryKey: ["employeesList"],
-    queryFn: () => apiFetch("/users", { params: { page: 1, limit: 100, role: "employee" } }),
+    queryFn: () => userService.getUsers({ page: 1, limit: 100, role: "employee" }),
   });
 
   const form = useForm<ProjectInputs>({
     resolver: zodResolver(projectSchema),
-    defaultValues: { name: "", description: "", status: "planning", team: [] },
+    defaultValues: { name: "", description: "", status: "Planning", team: [] },
   });
 
   // 3. Create Project Mutation
@@ -66,15 +69,11 @@ export default function AdminProjectsPage() {
     mutationFn: (inputs: ProjectInputs) => {
       const payload = {
         ...inputs,
-        manager: adminInfo?.id || "",
         // Ensure dates are ISO formatted if provided
         startDate: inputs.startDate ? new Date(inputs.startDate).toISOString() : undefined,
         endDate: inputs.endDate ? new Date(inputs.endDate).toISOString() : undefined,
       };
-      return apiFetch("/projects", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      return projectService.createProject(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
@@ -91,10 +90,7 @@ export default function AdminProjectsPage() {
         startDate: inputs.startDate ? new Date(inputs.startDate).toISOString() : undefined,
         endDate: inputs.endDate ? new Date(inputs.endDate).toISOString() : undefined,
       };
-      return apiFetch(`/projects/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      });
+      return projectService.updateProject(id, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
@@ -106,9 +102,7 @@ export default function AdminProjectsPage() {
   // 5. Delete Project Mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
-      apiFetch(`/projects/${id}`, {
-        method: "DELETE",
-      }),
+      projectService.deleteProject(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
@@ -140,15 +134,15 @@ export default function AdminProjectsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-white">Project Workflow</h1>
-          <p className="text-xs text-slate-400 mt-1">Configure project lifecycles and assign employee workspaces.</p>
+          <h1 className="text-xl font-bold tracking-tight text-text-title">Project Workflow</h1>
+          <p className="text-xs text-text-muted mt-1">Configure project lifecycles and assign employee workspaces.</p>
         </div>
         <button
           onClick={() => {
-            form.reset({ name: "", description: "", status: "planning", team: [] });
+            form.reset({ name: "", description: "", status: "Planning", team: [] });
             setProjectModalOpen(true);
           }}
-          className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg transition self-start"
+          className="px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-pure-white shadow-lg transition self-start"
         >
           <span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> New Project</span>
         </button>
@@ -156,9 +150,9 @@ export default function AdminProjectsPage() {
 
       {/* Projects Grid */}
       {projectsLoading ? (
-        <div className="text-center py-10 text-xs text-slate-400">Loading system projects...</div>
+        <div className="text-center py-10 text-xs text-text-muted">Loading system projects...</div>
       ) : !projects || projects.length === 0 ? (
-        <div className="text-center py-10 text-xs text-slate-500 border border-slate-850 rounded-2xl">
+        <div className="text-center py-10 text-xs text-text-muted border border-border-card rounded-2xl bg-bg-card/50">
           No projects configured yet. Click "New Project" to start.
         </div>
       ) : (
@@ -171,31 +165,30 @@ export default function AdminProjectsPage() {
             return (
               <div
                 key={proj.id}
-                className="p-6 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between"
+                className="p-6 rounded-2xl bg-bg-card border border-border-card hover:border-border-accent/60 transition flex flex-col justify-between shadow-sm hover:shadow-md"
               >
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
-                    <h3 className="font-bold text-white tracking-tight text-base">{proj.name}</h3>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${
-                      proj.status === "active"
+                    <h3 className="font-bold text-text-title tracking-tight text-base">{proj.name}</h3>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border capitalize ${proj.status?.toLowerCase() === "active"
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : proj.status === "completed"
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-slate-500/10 text-slate-400 border-slate-800"
-                    }`}>
+                        : proj.status?.toLowerCase() === "completed"
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-bg-accent text-text-muted border-border-card"
+                      }`}>
                       {proj.status}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-450 leading-relaxed min-h-[40px]">
+                  <p className="text-xs text-text-body leading-relaxed min-h-[40px]">
                     {proj.description || "No project description provided."}
                   </p>
 
-                  <div className="text-[11px] space-y-1 pt-2 border-t border-slate-800/60">
-                    <p className="text-slate-450">
-                      <span className="font-semibold text-slate-300">Team:</span> {teamNames || "Unassigned"}
+                  <div className="text-[11px] space-y-1 pt-2 border-t border-border-card/60">
+                    <p className="text-text-body">
+                      <span className="font-semibold text-text-title">Team:</span> {teamNames || "Unassigned"}
                     </p>
                     {proj.startDate && (
-                      <p className="text-slate-500">
+                      <p className="text-text-muted">
                         Start: {new Date(proj.startDate).toLocaleDateString()} &bull; End:{" "}
                         {proj.endDate ? new Date(proj.endDate).toLocaleDateString() : "N/A"}
                       </p>
@@ -203,20 +196,16 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-slate-800/40">
+                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-border-card/45">
                   <button
                     onClick={() => handleEdit(proj)}
-                    className="px-2.5 py-1 text-[11px] bg-slate-850 hover:bg-slate-800 text-slate-350 hover:text-white rounded-lg flex items-center gap-1"
+                    className="px-2.5 py-1 text-[11px] bg-bg-accent hover:bg-border-accent/40 text-text-body hover:text-text-title rounded-lg flex items-center gap-1"
                   >
                     <Pencil className="w-2.5 h-2.5" /> Edit
                   </button>
                   <button
-                    onClick={() => {
-                      if (confirm(`Are you sure you want to delete ${proj.name}?`)) {
-                        deleteMutation.mutate(proj.id);
-                      }
-                    }}
-                    className="px-2.5 py-1 text-[11px] bg-red-650/10 hover:bg-red-650 hover:text-white text-red-400 border border-red-500/15 rounded-lg flex items-center gap-1"
+                    onClick={() => setProjectToDelete(proj)}
+                    className="px-2.5 py-1 text-[11px] bg-red-500/10 hover:bg-red-50 hover:text-pure-white text-red-500 border border-red-500/20 rounded-lg flex items-center gap-1"
                   >
                     <Trash2 className="w-2.5 h-2.5" /> Delete
                   </button>
@@ -230,9 +219,9 @@ export default function AdminProjectsPage() {
       {/* Project Modal (Create/Edit) */}
       {(projectModalOpen || editingProject) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-white">
+          <div className="w-full max-w-lg bg-bg-card border border-border-card rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="flex justify-between items-center border-b border-border-card pb-3">
+              <h3 className="font-bold text-text-title">
                 {editingProject ? `Edit Project: ${editingProject.name}` : "Create New Project"}
               </h3>
               <button
@@ -240,7 +229,7 @@ export default function AdminProjectsPage() {
                   setProjectModalOpen(false);
                   setEditingProject(null);
                 }}
-                className="text-slate-400 hover:text-white"
+                className="text-text-muted hover:text-text-title"
               >
                 ✕
               </button>
@@ -257,13 +246,13 @@ export default function AdminProjectsPage() {
               className="space-y-4"
             >
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+                <label className="block text-[10px] uppercase tracking-wider text-text-muted font-semibold mb-1">
                   Project Name
                 </label>
                 <input
                   type="text"
                   {...form.register("name")}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                  className="w-full px-3 py-2 bg-bg-input border border-border-input rounded-xl text-xs text-text-title"
                   placeholder="Website Redesign"
                 />
                 {form.formState.errors.name && (
@@ -272,73 +261,73 @@ export default function AdminProjectsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+                <label className="block text-[10px] uppercase tracking-wider text-text-muted font-semibold mb-1">
                   Description
                 </label>
                 <textarea
                   {...form.register("description")}
                   rows={3}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                  className="w-full px-3 py-2 bg-bg-input border border-border-input rounded-xl text-xs text-text-title"
                   placeholder="Details about project objectives and scope..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+                  <label className="block text-[10px] uppercase tracking-wider text-text-muted font-semibold mb-1">
                     Start Date
                   </label>
                   <input
                     type="date"
                     {...form.register("startDate")}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                    className="w-full px-3 py-2 bg-bg-input border border-border-input rounded-xl text-xs text-text-title"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+                  <label className="block text-[10px] uppercase tracking-wider text-text-muted font-semibold mb-1">
                     End Date
                   </label>
                   <input
                     type="date"
                     {...form.register("endDate")}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                    className="w-full px-3 py-2 bg-bg-input border border-border-input rounded-xl text-xs text-text-title"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+                <label className="block text-[10px] uppercase tracking-wider text-text-muted font-semibold mb-1">
                   Status
                 </label>
                 <select
                   {...form.register("status")}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+                  className="w-full px-3 py-2 bg-bg-input border border-border-input rounded-xl text-xs text-text-title"
                 >
-                  <option value="planning">Planning</option>
-                  <option value="active">Active</option>
-                  <option value="completed">Completed</option>
-                  <option value="on-hold">On Hold</option>
+                  <option value="Planning">Planning</option>
+                  <option value="Active">Active</option>
+                  <option value="Completed">Completed</option>
+                  <option value="On Hold">On Hold</option>
                 </select>
               </div>
 
               {/* Assign Team Members Checkboxes */}
               <div>
-                <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5">
+                <label className="block text-[10px] uppercase tracking-wider text-text-muted font-semibold mb-1.5">
                   Assign Team Members
                 </label>
-                <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl max-h-40 overflow-y-auto space-y-2">
+                <div className="p-3 bg-bg-input border border-border-input rounded-xl max-h-40 overflow-y-auto space-y-2">
                   {!employeesData || employeesData.users.length === 0 ? (
                     <p className="text-[10px] text-slate-500 text-center py-2">
                       No active employees found to assign.
                     </p>
                   ) : (
                     employeesData.users.map((emp) => (
-                      <label key={emp.id} className="flex items-center gap-2 text-xs text-slate-350 cursor-pointer">
+                      <label key={emp.id} className="flex items-center gap-2 text-xs text-text-body cursor-pointer">
                         <input
                           type="checkbox"
                           checked={form.watch("team")?.includes(emp.id)}
                           onChange={(e) => handleCheckboxChange(emp.id, e.target.checked)}
-                          className="rounded border-slate-800 bg-slate-900 text-emerald-600 focus:ring-0"
+                          className="rounded border-border-input bg-bg-input text-emerald-600 focus:ring-0"
                         />
                         {emp.name}
                       </label>
@@ -350,7 +339,7 @@ export default function AdminProjectsPage() {
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white mt-4"
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-pure-white mt-4"
               >
                 {editingProject ? "Save Project Changes" : "Create Project Workflow"}
               </button>
@@ -358,6 +347,22 @@ export default function AdminProjectsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={!!projectToDelete}
+        onClose={() => setProjectToDelete(null)}
+        onConfirm={() => {
+          if (projectToDelete) {
+            deleteMutation.mutate(projectToDelete.id);
+          }
+        }}
+        title="Delete Project"
+        message={`Are you sure you want to permanently delete project "${projectToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }

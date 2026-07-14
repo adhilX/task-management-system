@@ -7,7 +7,7 @@ export class UpdateUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordHasher: IPasswordHasher
-  ) {}
+  ) { }
 
   async execute(id: string, dto: any): Promise<User> {
     const user = await this.userRepository.findById(id);

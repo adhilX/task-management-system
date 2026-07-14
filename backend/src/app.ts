@@ -29,7 +29,11 @@ export function createApp(config: {
   const app = express();
 
   // Middleware
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  );
   app.use(cookieParser());
   app.use(
     cors({
@@ -44,7 +48,7 @@ export function createApp(config: {
     standardHeaders: 'draft-7',
     legacyHeaders: false,
   });
-  app.use('/api', apiLimiter);
+  app.use('/api/v1', apiLimiter);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -59,20 +63,21 @@ export function createApp(config: {
 
   const authMiddleware = createAuthMiddleware(jwtService);
 
-  // Swagger Documentation at /api/docs
+  // Swagger Documentation at /api/docs and /api/v1/docs
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   // Base test route
-  app.get('/api', (req, res) => {
-    res.json({ message: 'Welcome to TaskFlow API' });
+  app.get('/api/v1', (req, res) => {
+    res.json({ message: 'Welcome to TaskFlow API v1' });
   });
 
   // Routers
-  app.use('/api/auth', createAuthRouter(userRepository, bcryptService, jwtService, authMiddleware));
-  app.use('/api/users', createUserRouter(userRepository, bcryptService, emailService, authMiddleware));
-  app.use('/api/projects', createProjectRouter(projectRepository, authMiddleware));
-  app.use('/api/tasks', createTaskRouter(taskRepository, projectRepository, userRepository, authMiddleware));
-  app.use('/api/dashboard', createDashboardRouter(userRepository, projectRepository, taskRepository, authMiddleware));
+  app.use('/api/v1/auth', createAuthRouter(userRepository, bcryptService, jwtService, authMiddleware));
+  app.use('/api/v1/users', createUserRouter(userRepository, bcryptService, emailService, authMiddleware));
+  app.use('/api/v1/projects', createProjectRouter(projectRepository, authMiddleware));
+  app.use('/api/v1/tasks', createTaskRouter(taskRepository, projectRepository, userRepository, authMiddleware));
+  app.use('/api/v1/dashboard', createDashboardRouter(userRepository, projectRepository, taskRepository, authMiddleware));
 
   // Error Handler
   app.use(errorMiddleware);

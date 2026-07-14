@@ -5,6 +5,7 @@ import { DeleteProjectUseCase } from '../../application/use-cases/projects/delet
 import { FindAllProjectsUseCase } from '../../application/use-cases/projects/find-all-projects.use-case';
 import { FindOneProjectUseCase } from '../../application/use-cases/projects/find-one-project.use-case';
 import { UpdateProjectUseCase } from '../../application/use-cases/projects/update-project.use-case';
+import { FindProjectMembersUseCase } from '../../application/use-cases/projects/find-project-members.use-case';
 import { MongooseProjectRepository } from '../../infrastructure/database/mongoose/repositories/mongoose-project.repository';
 import { UserRole } from '../../domain/enums/user-role.enum';
 import { rolesMiddleware } from '../middlewares/roles.middleware';
@@ -22,13 +23,15 @@ export const createProjectRouter = (
   const findAllProjectsUseCase = new FindAllProjectsUseCase(projectRepository);
   const findOneProjectUseCase = new FindOneProjectUseCase(projectRepository);
   const updateProjectUseCase = new UpdateProjectUseCase(projectRepository);
+  const findProjectMembersUseCase = new FindProjectMembersUseCase(projectRepository);
 
   const controller = new ProjectController(
     createProjectUseCase,
     deleteProjectUseCase,
     findAllProjectsUseCase,
     findOneProjectUseCase,
-    updateProjectUseCase
+    updateProjectUseCase,
+    findProjectMembersUseCase
   );
 
   // Authenticate all project routes
@@ -50,19 +53,16 @@ export const createProjectRouter = (
    *           schema:
    *             type: object
    *             required:
-   *               - name
-   *               - manager
-   *             properties:
+    *               - name
+    *             properties:
    *               name:
    *                 type: string
    *               description:
    *                 type: string
    *               status:
    *                 type: string
-   *                 enum: [Planning, Active, Completed, On Hold]
-   *               manager:
-   *                 type: string
-   *               team:
+    *                 enum: [Planning, Active, Completed, On Hold]
+    *               team:
    *                 type: array
    *                 items:
    *                   type: string
@@ -150,10 +150,8 @@ export const createProjectRouter = (
    *                 type: string
    *               status:
    *                 type: string
-   *                 enum: [Planning, Active, Completed, On Hold]
-   *               manager:
-   *                 type: string
-   *               team:
+    *                 enum: [Planning, Active, Completed, On Hold]
+    *               team:
    *                 type: array
    *                 items:
    *                   type: string
@@ -183,6 +181,7 @@ export const createProjectRouter = (
    *         description: Project deleted successfully
    */
   router.get('/:id', controller.findOne);
+  router.get('/:id/members', controller.getMembers);
   router.patch('/:id', rolesMiddleware(UserRole.ADMIN), validateBody(updateProjectSchema), controller.update);
   router.delete('/:id', rolesMiddleware(UserRole.ADMIN), controller.delete);
 

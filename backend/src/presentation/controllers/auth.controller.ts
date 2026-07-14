@@ -9,6 +9,14 @@ import { ActivateEmployeeUseCase } from '../../application/use-cases/auth/activa
 import { ChangePasswordUseCase } from '../../application/use-cases/auth/change-password.use-case';
 import { sendSuccess } from '../helpers/response.helper';
 import { BadRequestException } from '../../domain/errors/domain.exception';
+import { DtoMapper } from '../dtos/dto.mapper';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    role: string;
+  };
+}
 
 export class AuthController {
   constructor(
@@ -25,7 +33,7 @@ export class AuthController {
   verifyInvite = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.verifyInvitationUseCase.execute(req.params.token);
-      return sendSuccess(res, result, 'Invitation link is valid');
+      return sendSuccess(res, DtoMapper.toUser(result), 'Invitation link is valid');
     } catch (error) {
       next(error);
     }
@@ -42,7 +50,10 @@ export class AuthController {
 
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = (req as any).user;
+      const user = (req as AuthenticatedRequest).user;
+      if (!user) {
+        return next(new Error('User not authenticated'));
+      }
       await this.changePasswordUseCase.execute(user.id, req.body);
       return sendSuccess(res, null, 'Password changed successfully. Please log in again.');
     } catch (error) {
@@ -62,7 +73,7 @@ export class AuthController {
   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.registerUseCase.execute(req.body);
-      return sendSuccess(res, result, 'Admin user registered successfully', 201);
+      return sendSuccess(res, DtoMapper.toUser(result), 'Admin user registered successfully', 201);
     } catch (error) {
       next(error);
     }
@@ -72,7 +83,7 @@ export class AuthController {
     try {
       const result = await this.loginUseCase.execute(req.body);
       
-      const { refreshToken, ...responsePayload } = result;
+      const { refreshToken, user, accessToken } = result;
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -80,6 +91,11 @@ export class AuthController {
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
+
+      const responsePayload = {
+        user: DtoMapper.toUser(user),
+        accessToken,
+      };
 
       return sendSuccess(res, responsePayload, 'Login successful');
     } catch (error) {
@@ -91,7 +107,7 @@ export class AuthController {
     try {
       const result = await this.loginUseCase.execute({ ...req.body, portal: 'admin' });
       
-      const { refreshToken, ...responsePayload } = result;
+      const { refreshToken, user, accessToken } = result;
 
       res.cookie('adminRefreshToken', refreshToken, {
         httpOnly: true,
@@ -99,6 +115,11 @@ export class AuthController {
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
+
+      const responsePayload = {
+        user: DtoMapper.toUser(user),
+        accessToken,
+      };
 
       return sendSuccess(res, responsePayload, 'Admin Login successful');
     } catch (error) {
@@ -108,9 +129,12 @@ export class AuthController {
 
   me = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const user = (req as any).user;
+      const user = (req as AuthenticatedRequest).user;
+      if (!user) {
+        return next(new Error('User not authenticated'));
+      }
       const result = await this.getCurrentUserUseCase.execute(user.id);
-      return sendSuccess(res, result, 'Current user profile retrieved successfully');
+      return sendSuccess(res, DtoMapper.toUser(result), 'Current user profile retrieved successfully');
     } catch (error) {
       next(error);
     }
@@ -124,9 +148,11 @@ export class AuthController {
       }
       const result = await this.refreshTokenUseCase.execute(refreshToken);
       
-      const { refreshToken: newRefreshToken, ...responsePayload } = result as any; 
+      const responsePayload = {
+        accessToken: result.accessToken,
+      };
 
-      res.cookie('refreshToken', newRefreshToken, {
+      res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

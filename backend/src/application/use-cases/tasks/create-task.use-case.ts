@@ -24,13 +24,8 @@ export class CreateTaskUseCase {
       throw new NotFoundException(`User with ID ${dto.assignee} not found`);
     }
 
-    // 3. Verify assignee is part of the project team or is the manager
+    // 3. Ensure assignee is part of the project team, otherwise add them
     const assigneeIdStr = assignee.id?.toString();
-    const managerId = typeof project.manager === 'object' && project.manager !== null
-      ? (project.manager as any).id?.toString()
-      : project.manager.toString();
-
-    const isManager = managerId === assigneeIdStr;
     const isTeamMember = project.team.some((member: any) => {
       const memberId = typeof member === 'object' && member !== null
         ? member.id?.toString()
@@ -38,8 +33,12 @@ export class CreateTaskUseCase {
       return memberId === assigneeIdStr;
     });
 
-    if (!isManager && !isTeamMember) {
-      throw new BadRequestException('The assignee must be a member of the project team or the manager.');
+    if (!isTeamMember && project.id) {
+      const teamIds = project.team.map((member: any) =>
+        typeof member === 'object' && member !== null ? member.id?.toString() : member.toString()
+      );
+      teamIds.push(assigneeIdStr);
+      await this.projectRepository.update(project.id, { team: teamIds });
     }
 
     return this.taskRepository.create(dto);

@@ -1,61 +1,163 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { authService } from "../../../../services/auth.service";
+import { useAdminAuthStore } from "../../../../stores/adminAuthStore";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Please confirm your new password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type PasswordInputs = z.infer<typeof passwordSchema>;
 
 export default function AdminSettingsPage() {
+  const router = useRouter();
+  const { logout } = useAdminAuthStore();
+
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const passwordForm = useForm<PasswordInputs>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
+  });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: (inputs: PasswordInputs) =>
+      authService.changePassword({
+        currentPassword: inputs.currentPassword,
+        newPassword: inputs.newPassword,
+      }),
+    onSuccess: () => {
+      setPasswordSuccess("Password changed successfully! Logging out...");
+      passwordForm.reset();
+
+      // Logout after delay
+      setTimeout(() => {
+        logout();
+        router.push("/admin/login?relogin=true");
+      }, 2000);
+    },
+    onError: (err: any) => {
+      setPasswordError(err.message || "Failed to change password. Make sure current password is correct.");
+      setTimeout(() => setPasswordError(""), 4000);
+    },
+  });
+
   return (
     <div className="max-w-2xl p-6 rounded-2xl bg-slate-900/40 border border-slate-800 backdrop-blur-md space-y-6">
       <div>
-        <h3 className="font-bold text-white tracking-tight text-lg">System Settings</h3>
-        <p className="text-xs text-slate-400 mt-1">Configure global server parameters, JWT timeouts, and SMTP notification values.</p>
+        <h3 className="font-bold text-white tracking-tight text-lg">Change Password</h3>
+        <p className="text-xs text-slate-400 mt-1">Update your sign-in password. Note: Changing password will log you out.</p>
       </div>
 
-      <div className="space-y-4">
-        {/* Registration lock */}
-        <div className="p-4 bg-slate-950 border border-slate-900 rounded-xl flex items-center justify-between">
-          <div>
-            <h4 className="text-xs font-semibold text-white">Public Registrations</h4>
-            <p className="text-[10px] text-slate-500 mt-0.5">Disables registrations after the first admin setup.</p>
+      {passwordSuccess && (
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 rounded-xl text-xs text-emerald-400">
+          {passwordSuccess}
+        </div>
+      )}
+      {passwordError && (
+        <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-xs text-red-400">
+          {passwordError}
+        </div>
+      )}
+
+      <form onSubmit={passwordForm.handleSubmit((d) => changePasswordMutation.mutate(d))} className="space-y-4">
+        <div>
+          <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+            Current Password
+          </label>
+          <div className="relative">
+            <input
+              type={showCurrentPassword ? "text" : "password"}
+              {...passwordForm.register("currentPassword")}
+              className="w-full px-4 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white focus:outline-none"
+            >
+              {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
-          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
-            🔒 LOCKED
-          </span>
+          {passwordForm.formState.errors.currentPassword && (
+            <p className="text-[10px] text-red-400 mt-1">{passwordForm.formState.errors.currentPassword.message}</p>
+          )}
         </div>
 
-        {/* JWT configurations */}
-        <div className="p-4 bg-slate-950 border border-slate-900 rounded-xl space-y-3">
-          <h4 className="text-xs font-semibold text-white">Token Lifecycles</h4>
-          <div className="grid grid-cols-2 gap-4 text-[11px]">
-            <div>
-              <span className="text-slate-500 block">Access Token Expiry:</span>
-              <span className="font-mono text-white block mt-0.5">15 minutes (Standard)</span>
-            </div>
-            <div>
-              <span className="text-slate-500 block">Refresh Token Expiry:</span>
-              <span className="font-mono text-white block mt-0.5">7 days</span>
-            </div>
+        <div>
+          <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+            New Password
+          </label>
+          <div className="relative">
+            <input
+              type={showNewPassword ? "text" : "password"}
+              {...passwordForm.register("newPassword")}
+              className="w-full px-4 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white focus:outline-none"
+            >
+              {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
+          {passwordForm.formState.errors.newPassword && (
+            <p className="text-[10px] text-red-400 mt-1">{passwordForm.formState.errors.newPassword.message}</p>
+          )}
         </div>
 
-        {/* SMTP configurations */}
-        <div className="p-4 bg-slate-950 border border-slate-900 rounded-xl space-y-3">
-          <h4 className="text-xs font-semibold text-white">SMTP Notifications</h4>
-          <div className="space-y-2 text-[11px]">
-            <div className="flex justify-between border-b border-slate-900/50 pb-1.5">
-              <span className="text-slate-550">SMTP Host:</span>
-              <span className="font-mono text-slate-300">{process.env.SMTP_HOST || "Local Mock/Printed to Logs"}</span>
-            </div>
-            <div className="flex justify-between border-b border-slate-900/50 pb-1.5">
-              <span className="text-slate-550">SMTP Port:</span>
-              <span className="font-mono text-slate-300">{process.env.SMTP_PORT || "587"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-550">SMTP Sender:</span>
-              <span className="font-mono text-slate-300">{process.env.SMTP_FROM || '"TaskFlow" <no-reply@taskflow.com>'}</span>
-            </div>
+        <div>
+          <label className="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">
+            Confirm New Password
+          </label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              {...passwordForm.register("confirmPassword")}
+              className="w-full px-4 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white focus:outline-none"
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
+          {passwordForm.formState.errors.confirmPassword && (
+            <p className="text-[10px] text-red-400 mt-1">{passwordForm.formState.errors.confirmPassword.message}</p>
+          )}
         </div>
-      </div>
+
+        <button
+          type="submit"
+          disabled={changePasswordMutation.isPending}
+          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-semibold text-white shadow-lg transition"
+        >
+          {changePasswordMutation.isPending ? "Updating Password..." : "Change Security Password"}
+        </button>
+      </form>
     </div>
   );
 }

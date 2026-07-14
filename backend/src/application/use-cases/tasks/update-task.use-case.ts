@@ -47,6 +47,26 @@ export class UpdateTaskUseCase {
         if (!assignee) {
           throw new NotFoundException(`User with ID ${dto.assignee} not found`);
         }
+
+        const projectId = dto.project || (typeof task.project === 'object' && task.project !== null ? (task.project as any).id?.toString() : task.project.toString());
+        const project = await this.projectRepository.findById(projectId);
+        if (project) {
+          const assigneeIdStr = assignee.id?.toString();
+          const isTeamMember = project.team.some((member: any) => {
+            const memberId = typeof member === 'object' && member !== null
+              ? member.id?.toString()
+              : member.toString();
+            return memberId === assigneeIdStr;
+          });
+
+          if (!isTeamMember && project.id) {
+            const teamIds = project.team.map((member: any) =>
+              typeof member === 'object' && member !== null ? member.id?.toString() : member.toString()
+            );
+            teamIds.push(assigneeIdStr);
+            await this.projectRepository.update(project.id, { team: teamIds });
+          }
+        }
       }
     }
 
