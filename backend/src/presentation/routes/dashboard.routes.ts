@@ -24,7 +24,7 @@ export const createDashboardRouter = (
 
   /**
    * @openapi
-   * /api/dashboard/stats:
+   * /api/v1/dashboard/stats:
    *   get:
    *     tags:
    *       - Dashboard

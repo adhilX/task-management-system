@@ -45,7 +45,7 @@ export const createAuthRouter = (
 
   /**
    * @openapi
-   * /api/auth/register:
+   * /api/v1/auth/register:
    *   post:
    *     tags:
    *       - Auth
@@ -74,11 +74,23 @@ export const createAuthRouter = (
    *         description: Admin user registered successfully
    */
   router.post('/register', validateBody(registerSchema), controller.register);
+
+  /**
+   * @openapi
+   * /api/v1/auth/register-status:
+   *   get:
+   *     tags:
+   *       - Auth
+   *     summary: Check if initial registration (Admin bootstrap) has been done
+   *     responses:
+   *       200:
+   *         description: Registration status retrieved successfully
+   */
   router.get('/register-status', controller.registerStatus);
 
   /**
    * @openapi
-   * /api/auth/login:
+   * /api/v1/auth/login:
    *   post:
    *     tags:
    *       - Auth
@@ -105,7 +117,7 @@ export const createAuthRouter = (
 
   /**
    * @openapi
-   * /api/auth/admin/login:
+   * /api/v1/auth/admin/login:
    *   post:
    *     tags:
    *       - Auth
@@ -132,7 +144,7 @@ export const createAuthRouter = (
 
   /**
    * @openapi
-   * /api/auth/me:
+   * /api/v1/auth/me:
    *   get:
    *     tags:
    *       - Auth
@@ -147,7 +159,7 @@ export const createAuthRouter = (
 
   /**
    * @openapi
-   * /api/auth/refresh:
+   * /api/v1/auth/refresh:
    *   post:
    *     tags:
    *       - Auth
@@ -171,7 +183,7 @@ export const createAuthRouter = (
 
   /**
    * @openapi
-   * /api/auth/logout:
+   * /api/v1/auth/logout:
    *   post:
    *     tags:
    *       - Auth
@@ -182,8 +194,79 @@ export const createAuthRouter = (
    */
   router.post('/logout', controller.logout);
 
+  /**
+   * @openapi
+   * /api/v1/auth/invite/verify/{token}:
+   *   get:
+   *     tags:
+   *       - Auth
+   *     summary: Verify employee invitation token
+   *     parameters:
+   *       - name: token
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Invitation link is valid
+   */
   router.get('/invite/verify/:token', controller.verifyInvite);
+
+  /**
+   * @openapi
+   * /api/v1/auth/invite/activate:
+   *   post:
+   *     tags:
+   *       - Auth
+   *     summary: Activate employee account
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - token
+   *               - password
+   *             properties:
+   *               token:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Account activated successfully
+   */
   router.post('/invite/activate', controller.activateInvite);
+
+  /**
+   * @openapi
+   * /api/v1/auth/change-password:
+   *   post:
+   *     tags:
+   *       - Auth
+   *     summary: Change password
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - currentPassword
+   *               - newPassword
+   *             properties:
+   *               currentPassword:
+   *                 type: string
+   *               newPassword:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Password changed successfully
+   */
   router.post('/change-password', authMiddleware, controller.changePassword);
 
   return router;

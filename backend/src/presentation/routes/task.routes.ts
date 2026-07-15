@@ -40,7 +40,7 @@ export const createTaskRouter = (
 
   /**
    * @openapi
-   * /api/tasks:
+   * /api/v1/tasks:
    *   post:
    *     tags:
    *       - Tasks
@@ -126,7 +126,7 @@ export const createTaskRouter = (
 
   /**
    * @openapi
-   * /api/tasks/{id}:
+   * /api/v1/tasks/{id}:
    *   get:
    *     tags:
    *       - Tasks

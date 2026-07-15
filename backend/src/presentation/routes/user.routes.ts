@@ -42,12 +42,41 @@ export const createUserRouter = (
   router.use(authMiddleware);
   router.use(rolesMiddleware(UserRole.ADMIN));
 
+  /**
+   * @openapi
+   * /api/v1/users/invite:
+   *   post:
+   *     tags:
+   *       - Users
+   *     summary: Invite a new employee
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - name
+   *               - email
+   *             properties:
+   *               name:
+   *                 type: string
+   *               email:
+   *                 type: string
+   *               department:
+   *                 type: string
+   *     responses:
+   *       201:
+   *         description: Employee invited successfully
+   */
   router.post('/invite', validateBody(inviteEmployeeSchema), controller.invite);
 
 
   /**
    * @openapi
-   * /api/users:
+   * /api/v1/users:
    *   post:
    *     tags:
    *       - Users
@@ -122,7 +151,7 @@ export const createUserRouter = (
 
   /**
    * @openapi
-   * /api/users/{id}:
+   * /api/v1/users/{id}:
    *   get:
    *     tags:
    *       - Users
@@ -191,6 +220,38 @@ export const createUserRouter = (
    */
   router.get('/:id', controller.findOne);
   router.patch('/:id', validateBody(updateUserSchema), controller.update);
+
+  /**
+   * @openapi
+   * /api/v1/users/{id}/status:
+   *   patch:
+   *     tags:
+   *       - Users
+   *     summary: Update a user's status by ID
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: string
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - status
+   *             properties:
+   *               status:
+   *                 type: string
+   *                 enum: [active, inactive, pending]
+   *     responses:
+   *       200:
+   *         description: User status updated successfully
+   */
   router.patch('/:id/status', validateBody(updateUserStatusSchema), controller.updateStatus);
   router.delete('/:id', controller.delete);
 

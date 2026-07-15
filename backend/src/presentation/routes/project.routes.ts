@@ -41,7 +41,7 @@ export const createProjectRouter = (
 
   /**
    * @openapi
-   * /api/projects:
+   * /api/v1/projects:
    *   post:
    *     tags:
    *       - Projects
@@ -55,16 +55,16 @@ export const createProjectRouter = (
    *           schema:
    *             type: object
    *             required:
-    *               - name
-    *             properties:
+   *               - name
+   *             properties:
    *               name:
    *                 type: string
    *               description:
    *                 type: string
    *               status:
    *                 type: string
-    *                 enum: [Planning, Active, Completed, On Hold]
-    *               team:
+   *                 enum: [Planning, Active, Completed, On Hold]
+   *               team:
    *                 type: array
    *                 items:
    *                   type: string
@@ -112,7 +112,7 @@ export const createProjectRouter = (
 
   /**
    * @openapi
-   * /api/projects/{id}:
+   * /api/v1/projects/{id}:
    *   get:
    *     tags:
    *       - Projects
@@ -152,8 +152,8 @@ export const createProjectRouter = (
    *                 type: string
    *               status:
    *                 type: string
-    *                 enum: [Planning, Active, Completed, On Hold]
-    *               team:
+   *                 enum: [Planning, Active, Completed, On Hold]
+   *               team:
    *                 type: array
    *                 items:
    *                   type: string
@@ -183,6 +183,26 @@ export const createProjectRouter = (
    *         description: Project deleted successfully
    */
   router.get('/:id', controller.findOne);
+
+  /**
+   * @openapi
+   * /api/v1/projects/{id}/members:
+   *   get:
+   *     tags:
+   *       - Projects
+   *     summary: Get project members by project ID
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - name: id
+   *         in: path
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: Project members retrieved successfully
+   */
   router.get('/:id/members', controller.getMembers);
   router.patch('/:id', rolesMiddleware(UserRole.ADMIN), validateBody(updateProjectSchema), controller.update);
   router.delete('/:id', rolesMiddleware(UserRole.ADMIN), controller.delete);
