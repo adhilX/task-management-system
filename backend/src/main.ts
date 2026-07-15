@@ -10,6 +10,7 @@ const requiredEnvVars = [
   'MONGODB_URI',
   'BCRYPT_SALT_ROUNDS',
   'CORS_ORIGIN',
+  'JWT_EXPIRES_IN',
 ];
 
 for (const envVar of requiredEnvVars) {
