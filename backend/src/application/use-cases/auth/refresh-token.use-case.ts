@@ -24,7 +24,7 @@ export class RefreshTokenUseCase {
 
     const payload = { sub: user.id, email: user.email, role: user.role };
     const newAccessToken = this.tokenService.sign(payload);
-    const newRefreshToken = this.tokenService.sign(payload, { expiresIn: '7d' });
+    const newRefreshToken = this.tokenService.signRefresh(payload);
 
     return {
       accessToken: newAccessToken,
