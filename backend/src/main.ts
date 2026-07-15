@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI!;
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1m'; // Short lived access token
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS!, 10);
 const CORS_ORIGIN = process.env.CORS_ORIGIN!;
 
