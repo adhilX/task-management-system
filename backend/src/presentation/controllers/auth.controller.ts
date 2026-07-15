@@ -142,7 +142,8 @@ export class AuthController {
 
   refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const refreshToken = req.cookies?.refreshToken;
+      const hasAdminCookie = !!req.cookies?.adminRefreshToken;
+      const refreshToken = req.cookies?.refreshToken || req.cookies?.adminRefreshToken;
       if (!refreshToken) {
         throw new BadRequestException('Refresh token is required');
       }
@@ -152,7 +153,8 @@ export class AuthController {
         accessToken: result.accessToken,
       };
 
-      res.cookie('refreshToken', result.refreshToken, {
+      const cookieName = hasAdminCookie ? 'adminRefreshToken' : 'refreshToken';
+      res.cookie(cookieName, result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -167,11 +169,13 @@ export class AuthController {
   
   logout = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      res.clearCookie('refreshToken', {
+      const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-      });
+        sameSite: 'lax' as const,
+      };
+      res.clearCookie('refreshToken', cookieOptions);
+      res.clearCookie('adminRefreshToken', cookieOptions);
       return sendSuccess(res, null, 'Logout successful');
     } catch (error) {
       next(error);

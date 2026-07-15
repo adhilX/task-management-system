@@ -3,6 +3,7 @@ import { IProjectRepository } from '../../../domain/repositories/project-reposit
 import { ITaskRepository } from '../../../domain/repositories/task-repository.interface';
 import { TaskStatus } from '../../../domain/enums/task-status.enum';
 import { ProjectStatus } from '../../../domain/enums/project-status.enum';
+import { UserRole } from '../../../domain/enums/user-role.enum';
 
 export class GetAdminStatsUseCase {
   constructor(
@@ -25,7 +26,7 @@ export class GetAdminStatsUseCase {
       completedProjects,
       onHoldProjects,
     ] = await Promise.all([
-      this.userRepository.countAll(),
+      this.userRepository.countAll({ role: UserRole.EMPLOYEE }),
       this.projectRepository.countAll(),
       this.taskRepository.countAll(),
       this.taskRepository.countByStatus(TaskStatus.COMPLETED),

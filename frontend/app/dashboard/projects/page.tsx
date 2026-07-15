@@ -19,6 +19,9 @@ interface Project {
   endDate?: string;
   manager: string | Member;
   team: Array<string | Member>;
+  progress?: number;
+  totalTasks?: number;
+  completedTasks?: number;
 }
 
 export default function EmployeeProjectsPage() {
@@ -70,7 +73,7 @@ export default function EmployeeProjectsPage() {
                 key={proj.id}
                 className="p-5 rounded-2xl bg-bg-card border border-border-card hover:border-border-accent transition-all duration-300 flex flex-col justify-between group shadow-sm hover:shadow-md"
               >
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="flex justify-between items-start gap-4">
                     <h3 className="font-bold text-text-title tracking-tight text-sm group-hover:text-brand-primary transition-colors">{proj.name}</h3>
                     <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold border capitalize shrink-0 ${
@@ -86,6 +89,24 @@ export default function EmployeeProjectsPage() {
                   <p className="text-xs text-text-body leading-relaxed min-h-[40px]">
                     {proj.description || "No project description provided."}
                   </p>
+
+                  {/* Progress bar tracking */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex justify-between items-center text-[10px] font-bold">
+                      <span className="text-text-muted">Task Progress</span>
+                      <span className="text-brand-primary">{proj.progress || 0}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-bg-accent rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-brand-primary rounded-full transition-all duration-500"
+                        style={{ width: `${proj.progress || 0}%` }}
+                      />
+                    </div>
+                    <div className="text-[9px] text-text-muted flex justify-between font-semibold">
+                      <span>{proj.completedTasks || 0} completed</span>
+                      <span>{proj.totalTasks || 0} total tasks</span>
+                    </div>
+                  </div>
 
                   <div className="text-[11px] space-y-1.5 pt-3 border-t border-border-card/80">
                     <p className="text-text-body">

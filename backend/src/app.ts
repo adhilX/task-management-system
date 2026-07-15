@@ -75,7 +75,7 @@ export function createApp(config: {
   // Routers
   app.use('/api/v1/auth', createAuthRouter(userRepository, bcryptService, jwtService, authMiddleware));
   app.use('/api/v1/users', createUserRouter(userRepository, bcryptService, emailService, authMiddleware));
-  app.use('/api/v1/projects', createProjectRouter(projectRepository, authMiddleware));
+  app.use('/api/v1/projects', createProjectRouter(projectRepository, taskRepository, authMiddleware));
   app.use('/api/v1/tasks', createTaskRouter(taskRepository, projectRepository, userRepository, authMiddleware));
   app.use('/api/v1/dashboard', createDashboardRouter(userRepository, projectRepository, taskRepository, authMiddleware));
 

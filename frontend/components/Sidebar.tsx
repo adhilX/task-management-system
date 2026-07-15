@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useUserAuthStore } from "../stores/userAuthStore";
-import { LayoutDashboard, Folder, ClipboardList, User, LogOut, X } from "lucide-react";
+import { LayoutDashboard, Folder, ClipboardList, User, Settings, LogOut, X } from "lucide-react";
 import ConfirmationModal from "./ConfirmationModal";
 
 interface SidebarProps {
@@ -28,6 +28,7 @@ export default function Sidebar({ onCloseMobile, isMobile = false }: SidebarProp
     { name: "My Projects", path: "/dashboard/projects", icon: <Folder className="w-4 h-4" /> },
     { name: "My Tasks", path: "/dashboard/tasks", icon: <ClipboardList className="w-4 h-4" /> },
     { name: "Profile", path: "/dashboard/profile", icon: <User className="w-4 h-4" /> },
+    { name: "Settings", path: "/dashboard/settings", icon: <Settings className="w-4 h-4" /> },
   ];
 
   if (isMobile) {

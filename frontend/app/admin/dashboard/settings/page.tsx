@@ -9,6 +9,7 @@ import { authService } from "../../../../services/auth.service";
 import { useAdminAuthStore } from "../../../../stores/adminAuthStore";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -44,6 +45,7 @@ export default function AdminSettingsPage() {
         newPassword: inputs.newPassword,
       }),
     onSuccess: () => {
+      toast.success("Password changed successfully! Logging out...");
       setPasswordSuccess("Password changed successfully! Logging out...");
       passwordForm.reset();
 
@@ -54,7 +56,9 @@ export default function AdminSettingsPage() {
       }, 2000);
     },
     onError: (err: any) => {
-      setPasswordError(err.message || "Failed to change password. Make sure current password is correct.");
+      const errMsg = err.message || "Failed to change password. Make sure current password is correct.";
+      toast.error(errMsg);
+      setPasswordError(errMsg);
       setTimeout(() => setPasswordError(""), 4000);
     },
   });

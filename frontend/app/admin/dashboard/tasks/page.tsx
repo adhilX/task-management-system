@@ -7,6 +7,7 @@ import { projectService } from "../../../../services/project.service";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import TaskModal, { TaskInputs } from "../../../../components/TaskModal";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { toast } from "react-hot-toast";
 
 interface Member {
   id: string;
@@ -60,9 +61,13 @@ export default function AdminTasksPage() {
       };
       return taskService.createTask(payload);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast.success(`Task "${data.title}" created successfully!`);
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       setTaskModalOpen(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to create task");
     },
   });
 
@@ -75,9 +80,13 @@ export default function AdminTasksPage() {
       };
       return taskService.updateTask(id, payload);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast.success(`Task "${data.title}" updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       setEditingTask(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update task");
     },
   });
 
@@ -86,7 +95,12 @@ export default function AdminTasksPage() {
     mutationFn: (id: string) =>
       taskService.deleteTask(id),
     onSuccess: () => {
+      toast.success("Task deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      setTaskToDelete(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to delete task");
     },
   });
   const handleEdit = (task: Task) => {

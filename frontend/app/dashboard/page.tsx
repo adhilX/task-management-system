@@ -18,6 +18,16 @@ import {
   UserCheck
 } from "lucide-react";
 
+interface RecentActivity {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  updatedAt?: string;
+  assigneeName: string;
+  projectName: string;
+}
+
 interface EmployeeStats {
   assignedProjectsCount: number;
   tasksOverview: {
@@ -43,7 +53,22 @@ interface EmployeeStats {
     priority: string;
     projectName: string;
   }>;
+  recentActivities: RecentActivity[];
 }
+
+const timeAgo = (dateStr?: string | Date) => {
+  if (!dateStr) return "Just now";
+  const date = new Date(dateStr);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
 
 export default function EmployeeDashboardPage() {
   const { userInfo } = useUserAuthStore();
@@ -118,37 +143,7 @@ export default function EmployeeDashboardPage() {
   const mediumPercent = totalTasks ? Math.round((mediumPriority / totalTasks) * 100) : 0;
   const lowPercent = totalTasks ? Math.round((lowPriority / totalTasks) * 100) : 0;
 
-  // Custom static activity log simulated nicely to match the mockup
-  const recentActivities = [
-    {
-      id: "act-1",
-      title: 'Project "Website Redesign" created',
-      time: "2 min ago",
-      icon: <Folder className="w-4 h-4 text-purple-400" />,
-      bg: "bg-purple-500/10 border border-purple-500/20"
-    },
-    {
-      id: "act-2",
-      title: 'Task "API integration" completed',
-      time: "15 min ago",
-      icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
-      bg: "bg-emerald-500/10 border border-emerald-500/20"
-    },
-    {
-      id: "act-3",
-      title: "John Doe assigned you a task",
-      time: "1 hour ago",
-      icon: <UserCheck className="w-4 h-4 text-amber-400" />,
-      bg: "bg-amber-500/10 border border-amber-500/20"
-    },
-    {
-      id: "act-4",
-      title: "Design system.pdf uploaded",
-      time: "2 hours ago",
-      icon: <FileText className="w-4 h-4 text-sky-400" />,
-      bg: "bg-sky-500/10 border border-sky-500/20"
-    }
-  ];
+  const recentActivities = stats.recentActivities || [];
 
   return (
     <div className="h-auto lg:h-full w-full flex flex-col gap-4">
@@ -421,20 +416,48 @@ export default function EmployeeDashboardPage() {
             </div>
 
             <div className="divide-y divide-border-card/40 flex-1 overflow-hidden">
-              {recentActivities.map((act) => (
-                <div key={act.id} className="py-2.5 flex items-center justify-between gap-3 group cursor-pointer hover:bg-bg-accent/10 rounded-xl px-2 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg border ${act.bg} flex items-center justify-center shrink-0`}>
-                      {act.icon}
+              {recentActivities.length === 0 ? (
+                <p className="text-xs text-text-muted text-center py-4 font-semibold">No recent task logs found.</p>
+              ) : (
+                recentActivities.map((act) => {
+                  const isCompleted = act.status?.toLowerCase() === "completed";
+                  const isInProgress = act.status?.toLowerCase() === "in progress" || act.status?.toLowerCase() === "in-progress";
+                  const isReview = act.status?.toLowerCase() === "review";
+
+                  let icon = <UserCheck className="w-4 h-4 text-amber-400" />;
+                  let bg = "bg-amber-500/10 border border-amber-500/20";
+
+                  if (isCompleted) {
+                    icon = <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
+                    bg = "bg-emerald-500/10 border border-emerald-500/20";
+                  } else if (isInProgress) {
+                    icon = <Clock className="w-4 h-4 text-sky-400" />;
+                    bg = "bg-sky-500/10 border border-sky-500/20";
+                  } else if (isReview) {
+                    icon = <FileText className="w-4 h-4 text-purple-400" />;
+                    bg = "bg-purple-500/10 border border-purple-500/20";
+                  }
+
+                  return (
+                    <div key={act.id} className="py-2.5 flex items-center justify-between gap-3 group cursor-pointer hover:bg-bg-accent/10 rounded-xl px-2 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg border ${bg} flex items-center justify-center shrink-0`}>
+                          {icon}
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-text-title group-hover:text-brand-primary transition-colors">
+                            Task <span className="font-semibold text-text-title font-mono text-[9px]">#{act.id.substring(18)}</span> ("{act.title}") was updated
+                          </p>
+                          <p className="text-[9px] text-text-muted font-semibold mt-0.5">
+                            Project: {act.projectName} &bull; {timeAgo(act.updatedAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-text-muted group-hover:text-text-body group-hover:translate-x-0.5 transition-all" />
                     </div>
-                    <div>
-                      <p className="text-[11px] font-bold text-text-title group-hover:text-brand-primary transition-colors">{act.title}</p>
-                      <p className="text-[9px] text-text-muted font-semibold mt-0.5">{act.time}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-text-muted group-hover:text-text-body group-hover:translate-x-0.5 transition-all" />
-                </div>
-              ))}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

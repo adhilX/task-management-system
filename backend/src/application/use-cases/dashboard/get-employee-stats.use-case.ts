@@ -60,6 +60,15 @@ export class GetEmployeeStatsUseCase {
     // 3. Find upcoming deadlines
     const upcomingDeadlines = await this.taskRepository.findUpcomingDeadlines(employeeId, 5);
 
+    // 4. Get recent tasks based on updatedAt
+    const recentTasks = [...tasks]
+      .sort((a, b) => {
+        const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+        const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 5);
+
     return {
       assignedProjectsCount,
       tasksOverview: {
@@ -79,6 +88,7 @@ export class GetEmployeeStatsUseCase {
         high: highPriorityCount,
       },
       upcomingDeadlines,
+      recentTasks,
     };
   }
 }

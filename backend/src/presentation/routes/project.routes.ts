@@ -7,6 +7,7 @@ import { FindOneProjectUseCase } from '../../application/use-cases/projects/find
 import { UpdateProjectUseCase } from '../../application/use-cases/projects/update-project.use-case';
 import { FindProjectMembersUseCase } from '../../application/use-cases/projects/find-project-members.use-case';
 import { MongooseProjectRepository } from '../../infrastructure/database/mongoose/repositories/mongoose-project.repository';
+import { MongooseTaskRepository } from '../../infrastructure/database/mongoose/repositories/mongoose-task.repository';
 import { UserRole } from '../../domain/enums/user-role.enum';
 import { rolesMiddleware } from '../middlewares/roles.middleware';
 import { validateBody, validateQuery } from '../middlewares/validation.middleware';
@@ -14,14 +15,15 @@ import { createProjectSchema, updateProjectSchema, findAllProjectsQuerySchema } 
 
 export const createProjectRouter = (
   projectRepository: MongooseProjectRepository,
+  taskRepository: MongooseTaskRepository,
   authMiddleware: any
 ): Router => {
   const router = Router();
 
   const createProjectUseCase = new CreateProjectUseCase(projectRepository);
   const deleteProjectUseCase = new DeleteProjectUseCase(projectRepository);
-  const findAllProjectsUseCase = new FindAllProjectsUseCase(projectRepository);
-  const findOneProjectUseCase = new FindOneProjectUseCase(projectRepository);
+  const findAllProjectsUseCase = new FindAllProjectsUseCase(projectRepository, taskRepository);
+  const findOneProjectUseCase = new FindOneProjectUseCase(projectRepository, taskRepository);
   const updateProjectUseCase = new UpdateProjectUseCase(projectRepository);
   const findProjectMembersUseCase = new FindProjectMembersUseCase(projectRepository);
 

@@ -15,6 +15,6 @@ export interface IUserRepository {
   }): Promise<{ users: User[]; total: number }>;
   update(id: string, updateData: Partial<User>): Promise<User | null>;
   delete(id: string): Promise<User | null>;
-  countAll(): Promise<number>;
+  countAll(filter?: { role?: UserRole }): Promise<number>;
   findByInvitationToken(token: string): Promise<User | null>;
 }

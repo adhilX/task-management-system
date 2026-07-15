@@ -11,7 +11,7 @@ export class RefreshTokenUseCase {
   async execute(refreshToken: string) {
     let decoded: any;
     try {
-      decoded = this.tokenService.verify(refreshToken);
+      decoded = this.tokenService.verifyRefresh(refreshToken);
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }

@@ -7,6 +7,8 @@ import { authService } from "@/services/auth.service";
 import { useAdminAuthStore } from "@/stores/adminAuthStore";
 import { useUserAuthStore } from "@/stores/userAuthStore";
 
+import { toast } from "react-hot-toast";
+
 interface LoginFormProps {
   portal: "admin" | "employee";
 }
@@ -50,12 +52,12 @@ export default function LoginForm({ portal }: LoginFormProps) {
       }
 
       setAuth(data.accessToken, data.user);
+      toast.success("Welcome back! Logged in successfully.");
       router.push(portal === "admin" ? "/admin/dashboard" : "/dashboard");
     } catch (err: any) {
-      setError(
-        err.message ||
-          `Invalid ${portal === "admin" ? "administrator" : "employee"} credentials. Please try again.`
-      );
+      const errMsg = err.message || `Invalid ${portal === "admin" ? "administrator" : "employee"} credentials. Please try again.`;
+      setError(errMsg);
+      toast.error(errMsg);
       setLoading(false);
     }
   };

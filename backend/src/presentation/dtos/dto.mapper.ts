@@ -62,6 +62,7 @@ export interface EmployeeStatsDto {
     high: number;
   };
   upcomingDeadlines: UpcomingDeadlineDto[];
+  recentActivities: RecentActivityDto[];
 }
 
 export interface LoginResponseDto {
@@ -95,6 +96,9 @@ export interface ProjectDto {
   endDate?: string | Date;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  progress?: number;
+  totalTasks?: number;
+  completedTasks?: number;
 }
 
 export interface TaskDto {
@@ -172,6 +176,9 @@ export class DtoMapper {
       endDate: project.endDate,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
+      progress: (project as any).progress || 0,
+      totalTasks: (project as any).totalTasks || 0,
+      completedTasks: (project as any).completedTasks || 0,
     };
   }
 
@@ -325,6 +332,7 @@ export class DtoMapper {
         high: stats.priorityDistribution?.high || 0,
       },
       upcomingDeadlines: this.toUpcomingDeadlineList(stats.upcomingDeadlines),
+      recentActivities: this.toRecentActivityList(stats.recentTasks),
     };
   }
 }

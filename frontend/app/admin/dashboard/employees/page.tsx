@@ -8,6 +8,7 @@ import * as z from "zod";
 import { userService } from "../../../../services/user.service";
 import { Plus, Pencil, Trash2, Lock, Unlock } from "lucide-react";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { toast } from "react-hot-toast";
 
 const inviteSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -69,6 +70,7 @@ export default function AdminEmployeesPage() {
     mutationFn: (inputs: InviteInputs) =>
       userService.inviteEmployee(inputs),
     onSuccess: (newUser, variables) => {
+      toast.success(`Successfully invited ${variables.name}!`);
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       setSuccessMsg(`Successfully invited ${variables.name}! An email has been queued.`);
       inviteForm.reset();
@@ -76,6 +78,7 @@ export default function AdminEmployeesPage() {
       setTimeout(() => setSuccessMsg(""), 5000);
     },
     onError: (err: any) => {
+      toast.error(err.message || "Failed to invite employee.");
       setErrorMsg(err.message || "Failed to invite employee.");
       setTimeout(() => setErrorMsg(""), 5000);
     },
@@ -85,8 +88,12 @@ export default function AdminEmployeesPage() {
   const toggleStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       userService.updateUserStatus(id, status),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      toast.success(`Employee status set to ${variables.status} successfully.`);
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update employee status.");
     },
   });
 
@@ -94,9 +101,13 @@ export default function AdminEmployeesPage() {
   const editMutation = useMutation({
     mutationFn: ({ id, name, department }: { id: string; name: string; department: string }) =>
       userService.updateUser(id, { name, department }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast.success(`Employee "${data.name}" details updated.`);
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       setEditEmployee(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update employee details.");
     },
   });
 
@@ -105,7 +116,12 @@ export default function AdminEmployeesPage() {
     mutationFn: (id: string) =>
       userService.deleteUser(id),
     onSuccess: () => {
+      toast.success("Employee deleted successfully.");
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      setEmployeeToDelete(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to delete employee.");
     },
   });
 

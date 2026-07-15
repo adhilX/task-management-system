@@ -10,6 +10,7 @@ import { userService } from "../../../../services/user.service";
 import { useAdminAuthStore } from "../../../../stores/adminAuthStore";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { toast } from "react-hot-toast";
 
 const projectSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -36,6 +37,9 @@ interface Project {
   endDate?: string;
   manager: string | Member;
   team: Array<string | Member>;
+  progress?: number;
+  totalTasks?: number;
+  completedTasks?: number;
 }
 
 export default function AdminProjectsPage() {
@@ -75,10 +79,14 @@ export default function AdminProjectsPage() {
       };
       return projectService.createProject(payload);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast.success(`Project "${data.name}" created successfully!`);
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       setProjectModalOpen(false);
       form.reset();
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to create project");
     },
   });
 
@@ -92,10 +100,14 @@ export default function AdminProjectsPage() {
       };
       return projectService.updateProject(id, payload);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast.success(`Project "${data.name}" updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       setEditingProject(null);
       form.reset();
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update project");
     },
   });
 
@@ -104,7 +116,12 @@ export default function AdminProjectsPage() {
     mutationFn: (id: string) =>
       projectService.deleteProject(id),
     onSuccess: () => {
+      toast.success("Project deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      setProjectToDelete(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to delete project");
     },
   });
 
@@ -182,6 +199,24 @@ export default function AdminProjectsPage() {
                   <p className="text-xs text-text-body leading-relaxed min-h-[40px]">
                     {proj.description || "No project description provided."}
                   </p>
+
+                  {/* Progress bar tracking */}
+                  <div className="space-y-2 pt-1">
+                    <div className="flex justify-between items-center text-[10px] font-bold">
+                      <span className="text-text-muted">Task Progress</span>
+                      <span className="text-brand-primary">{proj.progress || 0}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-bg-accent rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-brand-primary rounded-full transition-all duration-500"
+                        style={{ width: `${proj.progress || 0}%` }}
+                      />
+                    </div>
+                    <div className="text-[9px] text-text-muted flex justify-between font-semibold">
+                      <span>{proj.completedTasks || 0} completed</span>
+                      <span>{proj.totalTasks || 0} total tasks</span>
+                    </div>
+                  </div>
 
                   <div className="text-[11px] space-y-1 pt-2 border-t border-border-card/60">
                     <p className="text-text-body">

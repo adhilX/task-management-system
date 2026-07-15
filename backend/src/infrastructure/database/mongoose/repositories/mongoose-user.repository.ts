@@ -93,8 +93,12 @@ export class MongooseUserRepository implements IUserRepository {
     return doc ? (doc.toJSON() as User) : null;
   }
 
-  async countAll(): Promise<number> {
-    return UserModel.countDocuments().exec();
+  async countAll(filter?: { role?: UserRole }): Promise<number> {
+    const queryFilter: any = {};
+    if (filter?.role) {
+      queryFilter.role = filter.role;
+    }
+    return UserModel.countDocuments(queryFilter).exec();
   }
 
   async findByInvitationToken(token: string): Promise<User | null> {

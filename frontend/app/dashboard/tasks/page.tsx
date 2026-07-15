@@ -4,6 +4,7 @@ import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { taskService } from "../../../services/task.service";
 import { ClipboardList } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 interface Member {
   id: string;
@@ -39,9 +40,13 @@ export default function EmployeeTasksPage() {
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       taskService.updateTask(id, { status }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      toast.success(`Task status updated to "${variables.status}"`);
       queryClient.invalidateQueries({ queryKey: ["employeeTasks"] });
       queryClient.invalidateQueries({ queryKey: ["employeeStats"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to update task status");
     },
   });
 
