@@ -187,16 +187,6 @@ export const createUserRouter = (
    *             properties:
    *               name:
    *                 type: string
-   *               email:
-   *                 type: string
-   *               password:
-   *                 type: string
-   *               role:
-   *                 type: string
-   *                 enum: [admin, employee]
-   *               status:
-   *                 type: string
-   *                 enum: [active, inactive]
    *               department:
    *                 type: string
    *     responses:
