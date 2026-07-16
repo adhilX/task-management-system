@@ -102,7 +102,7 @@ export default function InviteActivationPage() {
         <div className="pt-4">
           <Link
             href="/"
-            className="inline-block py-2.5 px-6 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-pure-white hover:bg-slate-800 transition duration-150"
+            className="inline-block py-2.5 px-6 rounded-xl bg-bg-input border border-border-input text-xs font-semibold text-text-title hover:bg-bg-card transition duration-150"
           >
             Go to Portals
           </Link>

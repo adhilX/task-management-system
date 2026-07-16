@@ -10,6 +10,10 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
+        url: 'https://task-management-system-vvio.onrender.com',
+        description: 'Production server',
+      },
+      {
         url: 'http://localhost:5000',
         description: 'Local development server',
       },

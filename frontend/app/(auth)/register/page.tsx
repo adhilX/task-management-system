@@ -90,7 +90,7 @@ export default function AdminRegisterPage() {
         <div className="pt-4">
           <Link
             href="/"
-            className="inline-block py-2.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg transition duration-150"
+            className="inline-block py-2.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-pure-white shadow-lg transition duration-150"
           >
             Go to Portals
           </Link>
@@ -169,7 +169,7 @@ export default function AdminRegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 rounded-xl text-sm font-semibold text-white shadow-lg bg-purple-600 hover:bg-purple-500 hover:shadow-purple-600/20 shadow-purple-600/10 transition duration-150"
+          className="w-full py-3 px-4 rounded-xl text-sm font-semibold text-pure-white shadow-lg bg-purple-600 hover:bg-purple-500 hover:shadow-purple-600/20 shadow-purple-600/10 transition duration-150"
         >
           {loading ? "Registering..." : "Create System Admin"}
         </button>
