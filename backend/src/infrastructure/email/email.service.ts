@@ -20,7 +20,8 @@ export class EmailService implements IEmailService {
           user,
           pass,
         },
-      });
+        family: 4, // Force IPv4 to prevent ENETUNREACH on networks with unreachable IPv6
+      } as any);
     }
   }
 
