@@ -24,17 +24,18 @@ export default function AdminDashboardLayout({
   }, []);
 
   React.useEffect(() => {
-    if (hasHydrated && !isAuthenticated) {
+    if (hasHydrated && (!isAuthenticated || adminInfo?.role !== "admin")) {
+      logout();
       router.push("/admin/login");
     }
-  }, [hasHydrated, isAuthenticated, router]);
+  }, [hasHydrated, isAuthenticated, adminInfo, router, logout]);
 
   const handleLogout = () => {
     logout();
     router.push("/admin/login");
   };
 
-  if (!hasHydrated || !isAuthenticated) {
+  if (!hasHydrated || !isAuthenticated || adminInfo?.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
         <div className="flex flex-col items-center gap-3">

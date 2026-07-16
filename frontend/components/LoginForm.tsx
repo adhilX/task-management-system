@@ -46,8 +46,10 @@ export default function LoginForm({ portal }: LoginFormProps) {
     try {
       let data;
       if (portal === "admin") {
+        userStore.logout(); // Clear employee store to prevent coexistence
         data = await authService.adminLogin({ email, password });
       } else {
+        adminStore.logout(); // Clear admin store to prevent coexistence
         data = await authService.login({ email, password, portal: "employee" });
       }
 

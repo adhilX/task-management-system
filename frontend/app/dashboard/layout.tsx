@@ -16,7 +16,7 @@ export default function EmployeeLayout({
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
-  const { userInfo, isAuthenticated } = useUserAuthStore();
+  const { userInfo, isAuthenticated, logout } = useUserAuthStore();
 
   // Set hydration complete state on mount
   React.useEffect(() => {
@@ -24,12 +24,13 @@ export default function EmployeeLayout({
   }, []);
 
   React.useEffect(() => {
-    if (hasHydrated && !isAuthenticated) {
+    if (hasHydrated && (!isAuthenticated || userInfo?.role !== "employee")) {
+      logout();
       router.push("/login");
     }
-  }, [hasHydrated, isAuthenticated, router]);
+  }, [hasHydrated, isAuthenticated, userInfo, router, logout]);
 
-  if (!hasHydrated || !isAuthenticated) {
+  if (!hasHydrated || !isAuthenticated || userInfo?.role !== "employee") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
         <div className="flex flex-col items-center gap-3">

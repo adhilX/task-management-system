@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
     );
   }
 
-  const completionRate = Math.round((stats.taskCompletion.completed / (stats.totalTasks || 1)) * 100);
+  const completionRate = Math.round(((stats?.taskCompletion?.completed || 0) / (stats?.totalTasks || 1)) * 100);
 
   return (
     <div className="h-auto lg:h-full w-full flex flex-col gap-4">
@@ -282,7 +282,7 @@ export default function AdminDashboardPage() {
               </div>
               <div>
                 <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider block">Completed Tasks</span>
-                <span className="text-2xl font-black text-text-title tracking-tight block mt-0.5">{stats.taskCompletion.completed}</span>
+                <span className="text-2xl font-black text-text-title tracking-tight block mt-0.5">{stats?.taskCompletion?.completed ?? 0}</span>
               </div>
             </div>
             <div className="flex items-center gap-1 text-[10px] font-bold">
@@ -322,10 +322,10 @@ export default function AdminDashboardPage() {
           <h3 className="font-bold text-text-title tracking-tight mb-4 text-sm">Project States</h3>
           <div className="space-y-4">
             {[
-              { label: "Active Projects", value: stats.projectProgress.active, color: "bg-emerald-500" },
-              { label: "Planning Stage", value: stats.projectProgress.planning, color: "bg-yellow-500" },
-              { label: "Completed Projects", value: stats.projectProgress.completed, color: "bg-blue-500" },
-              { label: "On Hold", value: stats.projectProgress.onHold, color: "bg-rose-500" },
+              { label: "Active Projects", value: stats?.projectProgress?.active ?? 0, color: "bg-emerald-500" },
+              { label: "Planning Stage", value: stats?.projectProgress?.planning ?? 0, color: "bg-yellow-500" },
+              { label: "Completed Projects", value: stats?.projectProgress?.completed ?? 0, color: "bg-blue-500" },
+              { label: "On Hold", value: stats?.projectProgress?.onHold ?? 0, color: "bg-rose-500" },
             ].map((item) => (
               <div key={item.label} className="space-y-1">
                 <div className="flex justify-between text-[11px] font-bold">
@@ -334,10 +334,10 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="h-1.5 w-full bg-bg-accent rounded-full overflow-hidden border border-border-card/30">
                   <div
-                    className={`h-full ${item.color} rounded-full`}
-                    style={{
-                      width: `${(item.value / (stats.totalProjects || 1)) * 100}%`,
-                    }}
+                     className={`h-full ${item.color} rounded-full`}
+                     style={{
+                       width: `${(item.value / (stats?.totalProjects || 1)) * 100}%`,
+                     }}
                   />
                 </div>
               </div>
@@ -350,10 +350,10 @@ export default function AdminDashboardPage() {
           <h3 className="font-bold text-text-title tracking-tight mb-4 text-sm">Task Breakdown</h3>
           <div className="space-y-4">
             {[
-              { label: "Todo", value: stats.taskCompletion.breakdown.todo, color: "bg-slate-500" },
-              { label: "In Progress", value: stats.taskCompletion.breakdown.inProgress, color: "bg-blue-500" },
-              { label: "In Review", value: stats.taskCompletion.breakdown.review, color: "bg-amber-500" },
-              { label: "Completed", value: stats.taskCompletion.breakdown.completed, color: "bg-emerald-500" },
+              { label: "Todo", value: stats?.taskCompletion?.breakdown?.todo ?? 0, color: "bg-slate-500" },
+              { label: "In Progress", value: stats?.taskCompletion?.breakdown?.inProgress ?? 0, color: "bg-blue-500" },
+              { label: "In Review", value: stats?.taskCompletion?.breakdown?.review ?? 0, color: "bg-amber-500" },
+              { label: "Completed", value: stats?.taskCompletion?.breakdown?.completed ?? 0, color: "bg-emerald-500" },
             ].map((item) => (
               <div key={item.label} className="space-y-1">
                 <div className="flex justify-between text-[11px] font-bold">
@@ -362,10 +362,10 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="h-1.5 w-full bg-bg-accent rounded-full overflow-hidden border border-border-card/30">
                   <div
-                    className={`h-full ${item.color} rounded-full`}
-                    style={{
-                      width: `${(item.value / (stats.totalTasks || 1)) * 100}%`,
-                    }}
+                     className={`h-full ${item.color} rounded-full`}
+                     style={{
+                       width: `${(item.value / (stats?.totalTasks || 1)) * 100}%`,
+                     }}
                   />
                 </div>
               </div>
