@@ -26,7 +26,7 @@ export const createUserRouter = (
   const deleteUserUseCase = new DeleteUserUseCase(userRepository);
   const findAllUsersUseCase = new FindAllUsersUseCase(userRepository);
   const findOneUserUseCase = new FindOneUserUseCase(userRepository);
-  const updateUserUseCase = new UpdateUserUseCase(userRepository, bcryptService);
+  const updateUserUseCase = new UpdateUserUseCase(userRepository);
   const inviteEmployeeUseCase = new InviteEmployeeUseCase(userRepository, emailService);
 
   const controller = new UserController(
